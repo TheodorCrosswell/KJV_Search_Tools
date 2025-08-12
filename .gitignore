@@ -1,7 +1,7 @@
 # TODO: temporary while in development, to avoid uploading db every update. Remove when done with product.
 .chroma
 data
-dev.ipynb
+dev*.ipynb
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
