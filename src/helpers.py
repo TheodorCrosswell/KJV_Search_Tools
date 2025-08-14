@@ -7,6 +7,7 @@ import sys
 import os
 import psutil
 import gc
+import time
 
 client = chromadb.PersistentClient(r"C:\repos\KJV_Search_Tools\.chroma")
 collection = client.get_or_create_collection("kjv_verses")
@@ -299,6 +300,48 @@ def get_distances():
             gc.collect()
 
         pbar.update(batch_size)
+
+
+def benchmark_file(file_path: str):
+    tests = [
+        (50, 2000555),
+        (2267, 516),
+        (45674, 45784),
+        (367733, 26775554),
+        (3467368, 247748),
+        (25733456, 235632),
+        (132456366, 7893),
+        (546756843, 25645786),
+        (754742225, 45363157),
+        (886866432, 4577),
+    ]
+    total_time = 0
+    for i in range(len(tests)):
+        try:
+            total_time -= time.perf_counter()
+            df = pl.scan_ipc(file_path).slice(tests[i][0], tests[i][1]).collect()
+            total_time += time.perf_counter()
+        except Exception as e:
+            print("Error while initializing dataframe:")
+            raise (e)
+
+    print(
+        f"""
+            {file_path}: {total_time:.2f} S
+        """
+    )
+
+
+def run_benchmark_file():
+
+    test_files = [
+        r"C:\repos\KJV_Search_Tools\data\kjv_distance_sorted.feather",
+        r"C:\repos\KJV_Search_Tools\data\kjv_distance_sorted_lz4.feather",
+        r"C:\repos\KJV_Search_Tools\data\kjv_distance_sorted_zstd.feather",
+    ]
+
+    for file in test_files:
+        benchmark_file(file)
 
 
 def export_raw_to_parquet(
