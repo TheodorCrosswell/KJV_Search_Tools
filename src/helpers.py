@@ -8,10 +8,66 @@ import os
 import psutil
 import gc
 import time
+from pathlib import Path
+
 
 client = chromadb.PersistentClient(r"C:\repos\KJV_Search_Tools\.chroma")
 collection = client.get_or_create_collection("kjv_verses")
 connection = duckdb.connect(r"C:\repos\KJV_Search_Tools\data\kjv.duckdb")
+
+
+class DataReader:
+    """
+    A dedicated reader for accessing slices from a large Feather file.
+
+    This class provides a clean interface to read chunks of data without
+    loading the entire file into memory, encapsulating the underlying
+    storage and query mechanism.
+    """
+
+    def __init__(self, file_path: str | Path):
+        """
+        Initializes the DataReader with the path to the data file.
+
+        Args:
+            file_path: The path to the uncompressed Feather file.
+
+        Raises:
+            FileNotFoundError: If the file does not exist at the given path.
+        """
+        self.file_path = Path(file_path)
+        if not self.file_path.exists():
+            raise FileNotFoundError(f"Data file not found at: {self.file_path}")
+
+    def get_slice(self, start_row: int, num_rows: int) -> np.ndarray:
+        """
+        Reads a specific slice of rows from the Feather file.
+
+        This method uses a lazy scan to ensure only the requested part of
+        the file is loaded into memory.
+
+        Args:
+            start_row: The starting row index for the slice.
+            num_rows: The number of rows to include in the slice.
+
+        Returns:
+            A NumPy array containing the requested data slice.
+            The shape of the array will be (num_rows, num_columns).
+        """
+        try:
+            # The core logic: lazy scan, slice, collect, and convert
+            data_chunk_df = (
+                pl.scan_ipc(self.file_path).slice(start_row, num_rows).collect()
+            )
+
+            # Return as a NumPy array for broad compatibility
+            return data_chunk_df.to_numpy()
+
+        except Exception as e:
+            # Catch potential Polars/Arrow errors for better diagnostics
+            print(f"An error occurred while reading the slice from {self.file_path}:")
+            # Re-raise the exception to let the caller handle it
+            raise e
 
 
 def create_results_table():
@@ -86,11 +142,6 @@ def create_kjv_df(
     )
 
     return kjv
-
-
-# # kjv.write_csv(r"C:\repos\KJV_Search_Tools\data\kjv.csv")
-
-# # kjv = pl.read_csv(r"C:\repos\KJV_Search_Tools\data\kjv.csv")
 
 
 def upload_kjv_to_chromadb(kjv: pl.DataFrame):
@@ -355,3 +406,33 @@ def export_raw_to_parquet(
         f"COPY raw TO '{output_path}' (FORMAT 'parquet', COMPRESSION 'zstd');"
     )
     print("Export complete.")
+
+
+# --- Example Usage ---
+if __name__ == "__main__":
+    # IMPORTANT: Update this path to your actual uncompressed feather file
+    path_to_my_file = r"C:\repos\KJV_Search_Tools\data\kjv_distance_sorted.feather"
+
+    try:
+        # 1. Create an instance of the reader
+        print(f"Initializing reader for file: {path_to_my_file}")
+        reader = DataReader(path_to_my_file)
+
+        # 2. Define the slice you want to get
+        start = 1000
+        length = 5
+        print(f"\nRequesting slice: start_row={start}, num_rows={length}")
+
+        # 3. Use the method to get the data
+        data_slice = reader.get_slice(start_row=start, num_rows=length)
+
+        # 4. Use the result
+        print("\nSuccessfully retrieved data slice.")
+        print("Data type:", type(data_slice))
+        print("Data shape:", data_slice.shape)
+        print("Data content:\n", data_slice)
+
+    except FileNotFoundError as e:
+        print(e)
+    except Exception as e:
+        print(f"An unexpected error occurred during the example usage: {e}")
