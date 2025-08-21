@@ -2,6 +2,9 @@
 .chroma
 data
 dev*.ipynb
+img
+static/tiles
+tiles.zip
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
