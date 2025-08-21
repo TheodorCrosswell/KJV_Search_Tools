@@ -12,6 +12,8 @@ from pathlib import Path
 from PIL import Image
 import numpy as np
 import glob
+import re
+import shutil
 
 
 # client = chromadb.PersistentClient(r"C:\repos\KJV_Search_Tools\.chroma")
@@ -643,6 +645,8 @@ def get_source_images_for_this_tile(
 def image_name_and_folder_handler(
     zoom_level: int, start_px_x: int, start_px_y: int
 ) -> str:
+    # TODO: update with new leaflet-style naming convention
+    """"""
     images_path = r"C:\repos\KJV_Search_Tools\static/tiles"
     image_path_pattern = "{zoom_level}/{start_px_x}"
     image_name_pattern = "{start_px_y}.png"
@@ -1266,3 +1270,39 @@ def janky_tile_rearranging():
     generate_images_from_mmap(
         r"C:\repos\KJV_Search_Tools\data\kjv_distance_sorted_uint8_jank.feather"
     )
+
+
+def copy_rename_tiles():
+    """This was used to convert the pixel-based naming scheme to the leaflet-style naming scheme"""
+
+    sizes_map = {
+        0: 32768,
+        1: 16384,
+        2: 8192,
+        3: 4096,
+        4: 2048,
+        5: 1024,
+        6: 512,
+        7: 256,
+    }
+
+    original_files = glob.glob(r"C:\repos\KJV_Search_Tools\static\tiles/*/*/*.png")
+    assert len(original_files) == 19907
+    pattern = r"static\\tiles\\(?P<zoom>\d+)\\(?P<x>\d+)\\(?P<y>\d+).png"
+    new_files = []
+    for old_path in original_files:
+        new_map = re.search(pattern, old_path).groupdict()
+        new_map["x"] = int(new_map["x"])
+        new_map["y"] = int(new_map["y"])
+        new_map["zoom"] = int(new_map["zoom"])
+        new_map["x"] = new_map["x"] // sizes_map[new_map["zoom"]]
+        new_map["y"] = new_map["y"] // sizes_map[new_map["zoom"]]
+        new_path = f"C:\\repos\\KJV_Search_Tools\\static\\tiles_leaflet\\{new_map["zoom"]}\\{new_map["x"]}\\{new_map["y"]}.png"
+        new_files.append(new_path)
+    print(f"New paths are like : {new_files[5000]}")
+    for i, new_path in enumerate(new_files):
+        directory = os.path.dirname(new_path)
+        if not os.path.exists(directory):
+            os.makedirs(directory, exist_ok=True)
+        shutil.copyfile(original_files[i], new_path)
+        # break

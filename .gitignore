@@ -4,7 +4,9 @@ data
 dev*.ipynb
 img
 static/tiles
+static/tiles_leaflet
 tiles.zip
+tiles_leaflet.zip
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
