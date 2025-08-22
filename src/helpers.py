@@ -1,7 +1,19 @@
+"""This module contains the code for creating the tiles.
+
+How I made the tiles:
+- Insert (Encode) KJV Bible verses into ChromaDB
+- Compute similarity for every (verse_1, verse_2) pair
+- Create tiles from similarity scores
+- Upscale / Downscale tiles to fit map component
+
+Please excuse the messy code. I had to reiterate
+on my design, and I did not refactor the preceding code."""
+
 from tqdm import tqdm
 import polars as pl
-import chromadb
-import duckdb
+
+# import chromadb
+# import duckdb
 import numpy as np
 import sys
 import os
@@ -76,6 +88,7 @@ class DataReader:
 
 
 def create_results_table():
+    """Creates the table that will store the results from comparing all verses to each other"""
     connection.execute(  # [-128, 128] for color. don't need high precision
         """CREATE OR REPLACE TABLE raw (
         verse_1_int SMALLINT,
@@ -87,6 +100,7 @@ def create_results_table():
 
 
 def read_kjv_df(csv_path: str = r"C:\repos\KJV_Search_Tools\data\kjv.csv"):
+    """Reads kjv.csv as a Polars dataframe."""
     kjv = pl.read_csv(csv_path)
     return kjv
 
@@ -94,6 +108,7 @@ def read_kjv_df(csv_path: str = r"C:\repos\KJV_Search_Tools\data\kjv.csv"):
 def write_kjv_df(
     kjv: pl.DataFrame, csv_path: str = r"C:\repos\KJV_Search_Tools\data\kjv.csv"
 ):
+    """Saves df_kjv as kjv.csv"""
     kjv.write_csv(csv_path)
 
 
@@ -150,6 +165,7 @@ def create_kjv_df(
 
 
 def upload_kjv_to_chromadb(kjv: pl.DataFrame):
+    """This insert and encodes each verse in ChromaDB. It uses the default encoder, All-MiniLM-l6-v2."""
     batch_size = 100
     for batch in (slices := tqdm(kjv.iter_slices(batch_size), total=len(kjv) // 100)):
         slices.set_description(f"{batch.item(0,0)}")
@@ -178,7 +194,7 @@ def scale_distances_to_int8(distances_f64: np.ndarray) -> np.ndarray:
     Scales a NumPy array of f64 distances to the int8 range [-128, 127],
     assuming the input distances are in the theoretical range of [0.0, 4.0].
 
-    This is a lossy conversion designed to save memory.
+    This is a lossy conversion designed to save memory and disk space.
 
     Args:
         distances_f64: A NumPy array of float64 distances (from an L2 space).
@@ -214,6 +230,7 @@ def scale_distances_to_int8(distances_f64: np.ndarray) -> np.ndarray:
 
 # Assume max distance = 4
 def get_distances():
+    """Computes the distances between every verse and saves them."""
     kjv = (
         pl.read_csv(r"C:\repos\KJV_Search_Tools\data\kjv.csv")
         #
@@ -359,6 +376,7 @@ def get_distances():
 
 
 def benchmark_file(file_path: str):
+    """Records the completion time to read certain chunks from the file."""
     tests = [
         (50, 2000555),
         (2267, 516),
@@ -389,7 +407,7 @@ def benchmark_file(file_path: str):
 
 
 def run_benchmark_file():
-
+    """Used to check if compression makes any difference in reading speed. It does. Just go uncompressed."""
     test_files = [
         r"C:\repos\KJV_Search_Tools\data\kjv_distance_sorted.feather",
         r"C:\repos\KJV_Search_Tools\data\kjv_distance_sorted_lz4.feather",
@@ -403,6 +421,7 @@ def run_benchmark_file():
 def export_raw_to_parquet(
     output_path: str = r"C:\repos\KJV_Search_Tools\data\kjv.parquet",
 ):
+    """Saves the distances as a .parquet file."""
     """
     Exports the 'raw' table to a ZSTD compressed Parquet file.
     """
@@ -413,38 +432,8 @@ def export_raw_to_parquet(
     print("Export complete.")
 
 
-# --- Example Usage ---
-if __name__ == "__main__":
-    # IMPORTANT: Update this path to your actual uncompressed feather file
-    path_to_my_file = r"C:\repos\KJV_Search_Tools\data\kjv_distance_sorted.feather"
-
-    try:
-        # 1. Create an instance of the reader
-        print(f"Initializing reader for file: {path_to_my_file}")
-        reader = DataReader(path_to_my_file)
-
-        # 2. Define the slice you want to get
-        start = 1000
-        length = 5
-        print(f"\nRequesting slice: start_row={start}, num_rows={length}")
-
-        # 3. Use the method to get the data
-        data_slice = reader.get_slice(start_row=start, num_rows=length)
-
-        # 4. Use the result
-        print("\nSuccessfully retrieved data slice.")
-        print("Data type:", type(data_slice))
-        print("Data shape:", data_slice.shape)
-        print("Data content:\n", data_slice)
-
-    except FileNotFoundError as e:
-        print(e)
-    except Exception as e:
-        print(f"An unexpected error occurred during the example usage: {e}")
-
-
 def generate_256px_image_direct(start_px_x: int, start_px_y: int):
-
+    """Generates a 256x256px image from the raw data. These images will then be used to create all the other layers of tiles."""
     df = pl.read_ipc(
         r"C:\repos\KJV_Search_Tools\data\kjv_distance_sorted_uint8_jank.feather"
     )
@@ -478,6 +467,7 @@ def generate_256px_image_direct(start_px_x: int, start_px_y: int):
 
 
 def generate_images_from_mmap():
+    """Orchestrates generating all the initial zoom level 7 native resolution tiles."""
     image_shape = (31102, 31102)
     tile_shape = (256, 256)
 
@@ -529,6 +519,8 @@ def generate_images_from_mmap():
 
 
 def test_resampling_methods():
+    """Showcases which resampling method is best.
+    I settled on Lanczos."""
     methods_to_try = [
         Image.Resampling.BICUBIC,
         Image.Resampling.BILINEAR,
@@ -557,7 +549,7 @@ def test_resampling_methods():
 
 
 def downsize_images(four_images: list[Image.Image]) -> Image.Image:
-    """Downsamples and combines the images into a lower detail tile.
+    """Downsamples and combines 4 256x256px tiles into a lower detail 256x256 tile.
     Image order:
     - Left, Top,
     - Right, Top,
@@ -585,6 +577,7 @@ def downsize_images(four_images: list[Image.Image]) -> Image.Image:
 def get_source_images_for_this_tile(
     zoom_level: int, start_px_x: int, start_px_y: int
 ) -> list[Image.Image]:
+    """Gets the PIL.Image.Images to downsample for the given tile parameters."""
     sizes_map = {
         0: 32768,
         1: 16384,
@@ -642,6 +635,7 @@ def get_source_images_for_this_tile(
     return images
 
 
+# TODO: file structure was changed, need to update other functions.
 # def image_name_and_folder_handler(
 #     zoom_level: int, start_px_x: int, start_px_y: int
 # ) -> str:
@@ -674,6 +668,9 @@ def get_source_images_for_this_tile(
 
 
 def generate_images_zoom():
+    """Orchestrates taking all the images and downsizing them until
+    it reaches a 256x256px tile that encompasses
+    the entire 31102x31102 original image."""
     image_shape = (31102, 31102)
     tile_shape = (256, 256)
     zoom_levels = list(range(0, 7))[::-1]  # [6, 5, 4, 3, 2, 1, 0]
@@ -704,6 +701,7 @@ def generate_images_zoom():
 
 
 def pixel_info(x: int, y: int):
+    """Can be used to get metadata for 2 verse_id s"""
     distance = (
         pl.scan_ipc(
             r"C:\repos\KJV_Search_Tools\data\kjv_distance_sorted_uint8_jank.feather"
@@ -732,6 +730,7 @@ def pixel_info(x: int, y: int):
 
 
 def get_full_resolution_image():
+    """Creates a full 31102x31102px image, representing everything."""
     full_img = Image.new("L", (31102, 31102))
     df_images_list = pl.DataFrame(
         glob.glob(r"C:/repos/KJV_Search_Tools/img/lanczos/0_256/*/*/*.png")
@@ -757,7 +756,9 @@ def get_full_resolution_image():
 
 
 def run_retrieval_benchmark():
-    """Conclusion: scan_ipc is ridiculously slow when collecting in a loop.
+    """Used to check what retrieval method is quickest.
+
+    Conclusion: scan_ipc is ridiculously slow when collecting in a loop.
     It's amost certainly better to just load the whole dataset into memory."""
     df_benchmark = pl.DataFrame(
         {"benchmark": "blank", "effective time": 0.0, "count": 0}
@@ -1309,7 +1310,8 @@ def copy_rename_tiles():
 
 
 def upsize_image(source_image: Image.Image) -> list[Image.Image]:
-    """Divides an image into 4 with the same resolution, allowing for extreme zoom and rendering the individual pixels
+    """Divides an image into 4 with the same resolution,
+    allowing for extreme zoom and rendering the individual pixels
     Image order:
     - Left, Top,
     - Right, Top,
@@ -1335,6 +1337,8 @@ def upsize_image(source_image: Image.Image) -> list[Image.Image]:
 
 
 def create_upsized_images_for_this_tile(zoom: int, x: int, y: int):
+    """Divides the given 256x256px tile into 4x 64x64px tiles,
+    which are then each upscaled back to 256x256px."""
     source_path = image_name_and_folder_handler(zoom, x, y)
     source_tile = Image.open(source_path)
 
@@ -1372,7 +1376,7 @@ def create_upsized_images_for_this_tile(zoom: int, x: int, y: int):
 
 
 def image_name_and_folder_handler(zoom: int, x: int, y: int) -> str:
-    """"""
+    """Handles making the filepath string and creating needed directories."""
     images_path = r"C:\repos\KJV_Search_Tools\static/tiles"
     image_path_pattern = "{zoom}/{x}/{y}.png"
 
@@ -1395,6 +1399,7 @@ def image_name_and_folder_handler(zoom: int, x: int, y: int) -> str:
 
 
 def get_zoom_x_y_from_tile_path(tile_path: str):
+    """Gets the zoom, x, y values from the tile's storage path."""
     pattern = r"static\\tiles\\(?P<zoom>\d+)\\(?P<x>\d+)\\(?P<y>\d+).png"
     new_map = re.search(pattern, tile_path).groupdict()
     new_map["x"] = int(new_map["x"])
@@ -1404,7 +1409,8 @@ def get_zoom_x_y_from_tile_path(tile_path: str):
 
 
 def generate_images_extra_zoom():
-    """Generates images that are just upscaled versions of quadrants of the original 256x256 tiles"""
+    """Generates images that are just upscaled versions
+    of quadrants of the original 256x256px tiles"""
     zoom_levels = list(range(8, 10))  # [8, 9]
     for zoom_level in zoom_levels:
         source_zoom_level = zoom_level - 1

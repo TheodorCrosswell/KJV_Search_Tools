@@ -1,5 +1,4 @@
-
-// Step 1: Map Initialization
+// Map Initialization
 
 // Create a new Leaflet map instance and attach it to the 'map' div
 const map = L.map('map', {
@@ -7,8 +6,7 @@ const map = L.map('map', {
     minZoom: 0
 });
 
-
-// Define the pixel boundaries of your image at its native zoom level
+// Define the pixel boundaries of the image at its native zoom level
 const imagePixelBounds = [
     [0, 0],              // Top-left corner
     [31102, 31102]       // Bottom-right corner
@@ -19,29 +17,25 @@ const imageLatLngBounds = L.latLngBounds(
     map.unproject(imagePixelBounds[0], 7), // Use native zoom level 7
     map.unproject(imagePixelBounds[1], 7)  // Use native zoom level 7
 );
-// --- Your tileLayer code from Step 2 should go here ---
 
+// Related to main.py
 const tileUrl = '/static/tiles/{z}/{x}/{y}.png';
+
 const tileLayer = L.tileLayer(tileUrl, {
     minZoom: 0,
-    maxZoom: 12,
-    maxNativeZoom: 9,
+    maxZoom: 12, // Max zoom is higher, to allow the user to zoom more and easily distinguish and click individual pixels.
+    maxNativeZoom: 9, // 7 is native resolution, 9 is a 64x64px image upscaled to 256, to enable more zooming.
     tileSize: 256,
     noWrap: true,
-    attribution: 'KJV Dataset by <a href="https://github.com/TheodorCrosswell">Theodor Crosswell',
-    bounds: imageLatLngBounds ,
+    attribution: 'KJV Dataset by <a href="https://github.com/TheodorCrosswell">Theodor Crosswell', // I made the tiles and distances dataset.
+    bounds: imageLatLngBounds , // To prevent the page from requesting nonexistent tiles from the server.
 });
 tileLayer.addTo(map);
 
-// --- New Bounds Calculation ---
-
-// Now, set the map's boundaries and initial view
-// map.setMaxBounds(imageLatLngBounds);
+// Map initial view
 map.fitBounds(imageLatLngBounds);
 
-
-// Step 3: Click Event Handling
-
+// Click handling
 map.on('click', function(e) {
     // We want the pixel coordinates at the zoom level that represents the original image size.
     const targetZoom = 7;
@@ -50,7 +44,7 @@ map.on('click', function(e) {
     const pixelCoords = map.project(e.latlng, targetZoom);
 
     // The result from project() is an object with x and y properties.
-    // We need to round them to get integer coordinates for our API call.
+    // We need to round them to get integer coordinates for the API call.
     const x = Math.floor(pixelCoords.x);
     const y = Math.floor(pixelCoords.y);
 
