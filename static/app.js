@@ -1,36 +1,84 @@
+
 // Step 1: Map Initialization
 
 // Create a new Leaflet map instance and attach it to the 'map' div
-// L.CRS.Simple is used for non-geographical maps with a simple Cartesian coordinate system. [10]
 const map = L.map('map', {
     crs: L.CRS.Simple,
-    // Set the minimum zoom level for the map
-    minZoom: 0,
-    // maxZoom: 12,
+    minZoom: 0
 });
 
-// Set the initial view of the map.
-// The coordinates are [y, x] and the number is the zoom level.
-// For a simple CRS, [0, 0] is a common starting center.
-map.setView([0, 0], 2);
 
+// Define the pixel boundaries of your image at its native zoom level
+const imagePixelBounds = [
+    [0, 0],              // Top-left corner
+    [31102, 31102]       // Bottom-right corner
+];
 
-// Step 2: Tile Layer
+// Convert these pixel points into the map's LatLng coordinate system
+const imageLatLngBounds = L.latLngBounds(
+    map.unproject(imagePixelBounds[0], 7), // Use native zoom level 7
+    map.unproject(imagePixelBounds[1], 7)  // Use native zoom level 7
+);
+// --- Your tileLayer code from Step 2 should go here ---
 
-// Define the URL template for the tiles from the FastAPI back-end
 const tileUrl = '/static/tiles/{z}/{x}/{y}.png';
-
-// Create a tile layer with the specified URL and configurations
 const tileLayer = L.tileLayer(tileUrl, {
     minZoom: 0,
     maxZoom: 12,
     maxNativeZoom: 9,
-    // NEW: The absolute highest zoom level the layer will display.
-    // This should match the map's maxZoom to allow zooming that far.
     tileSize: 256,
-    noWrap: true, // Prevents the map from repeating horizontally
-    attribution: 'Your Image Viewer' // Optional: Add an attribution control
+    noWrap: true,
+    attribution: 'KJV Dataset by <a href="https://github.com/TheodorCrosswell">Theodor Crosswell',
+    bounds: imageLatLngBounds ,
 });
-
-// Add the configured tile layer to the map
 tileLayer.addTo(map);
+
+// --- New Bounds Calculation ---
+
+// Now, set the map's boundaries and initial view
+// map.setMaxBounds(imageLatLngBounds);
+map.fitBounds(imageLatLngBounds);
+
+
+// Step 3: Click Event Handling
+
+map.on('click', function(e) {
+    // We want the pixel coordinates at the zoom level that represents the original image size.
+    const targetZoom = 7;
+
+    // Project the map's lat/lng coordinates to pixel coordinates at our target zoom level.
+    const pixelCoords = map.project(e.latlng, targetZoom);
+
+    // The result from project() is an object with x and y properties.
+    // We need to round them to get integer coordinates for our API call.
+    const x = Math.floor(pixelCoords.x);
+    const y = Math.floor(pixelCoords.y);
+
+    // Construct the URL for our FastAPI endpoint
+    const apiUrl = `/api/pixel_info/${x}/${y}`;
+
+    // Use fetch to make the API call
+    fetch(apiUrl)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            const contentLines = [];
+            for (const [key, value] of Object.entries(data)) {
+                const formattedKey = key.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+                contentLines.push(`<b>${formattedKey}:</b> ${value}`);
+            }
+            const popupContent = contentLines.join('<br>');
+
+            L.popup()
+                .setLatLng(e.latlng)
+                .setContent(popupContent)
+                .openOn(map);
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
+});
