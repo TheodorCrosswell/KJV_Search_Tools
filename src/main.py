@@ -10,12 +10,11 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 app.mount("/static/tiles", StaticFiles(directory="static/tiles"), name="tiles")
 
 
-# @app.get("/api/pixel_info/{x}/{y}")
-# def get_pixel_info(x: int, y: int):
-#     return pixel_info(x, y)
+@app.get("/api/pixel_info/{x}/{y}")
+def get_pixel_info(x: int, y: int):
+    return pixel_info(x, y)
 
 
-# just the index.html
 @app.get("/")
 async def read_index():
     return FileResponse("index.html")

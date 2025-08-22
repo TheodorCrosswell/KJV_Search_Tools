@@ -6,7 +6,7 @@ const map = L.map('map', {
     crs: L.CRS.Simple,
     // Set the minimum zoom level for the map
     minZoom: 0,
-    maxZoom: 7,
+    // maxZoom: 12,
 });
 
 // Set the initial view of the map.
@@ -23,7 +23,10 @@ const tileUrl = '/static/tiles/{z}/{x}/{y}.png';
 // Create a tile layer with the specified URL and configurations
 const tileLayer = L.tileLayer(tileUrl, {
     minZoom: 0,
-    maxZoom: 7,
+    maxZoom: 12,
+    maxNativeZoom: 9,
+    // NEW: The absolute highest zoom level the layer will display.
+    // This should match the map's maxZoom to allow zooming that far.
     tileSize: 256,
     noWrap: true, // Prevents the map from repeating horizontally
     attribution: 'Your Image Viewer' // Optional: Add an attribution control

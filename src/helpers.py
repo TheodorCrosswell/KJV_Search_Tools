@@ -642,35 +642,35 @@ def get_source_images_for_this_tile(
     return images
 
 
-def image_name_and_folder_handler(
-    zoom_level: int, start_px_x: int, start_px_y: int
-) -> str:
-    # TODO: update with new leaflet-style naming convention
-    """"""
-    images_path = r"C:\repos\KJV_Search_Tools\static/tiles"
-    image_path_pattern = "{zoom_level}/{start_px_x}"
-    image_name_pattern = "{start_px_y}.png"
+# def image_name_and_folder_handler(
+#     zoom_level: int, start_px_x: int, start_px_y: int
+# ) -> str:
+#     # TODO: update with new leaflet-style naming convention
+#     """"""
+#     images_path = r"C:\repos\KJV_Search_Tools\static/tiles"
+#     image_path_pattern = "{zoom_level}/{start_px_x}"
+#     image_name_pattern = "{start_px_y}.png"
 
-    full_image_path = os.path.join(
-        images_path,
-        image_path_pattern.format_map(
-            {
-                "zoom_level": zoom_level,
-                "start_px_x": start_px_x,
-            }
-        ),
-        image_name_pattern.format_map(
-            {
-                "start_px_y": start_px_y,
-            }
-        ),
-    )
+#     full_image_path = os.path.join(
+#         images_path,
+#         image_path_pattern.format_map(
+#             {
+#                 "zoom_level": zoom_level,
+#                 "start_px_x": start_px_x,
+#             }
+#         ),
+#         image_name_pattern.format_map(
+#             {
+#                 "start_px_y": start_px_y,
+#             }
+#         ),
+#     )
 
-    directory = os.path.dirname(full_image_path)
+#     directory = os.path.dirname(full_image_path)
 
-    if not os.path.exists(directory):
-        os.makedirs(directory, exist_ok=True)
-    return full_image_path
+#     if not os.path.exists(directory):
+#         os.makedirs(directory, exist_ok=True)
+#     return full_image_path
 
 
 def generate_images_zoom():
@@ -1306,3 +1306,119 @@ def copy_rename_tiles():
             os.makedirs(directory, exist_ok=True)
         shutil.copyfile(original_files[i], new_path)
         # break
+
+
+def upsize_image(source_image: Image.Image) -> list[Image.Image]:
+    """Divides an image into 4 with the same resolution, allowing for extreme zoom and rendering the individual pixels
+    Image order:
+    - Left, Top,
+    - Right, Top,
+    - Left, Bottom,
+    - Right, Bottom.
+    """
+
+    upsized_images = [
+        source_image.resize(
+            (256, 256), resample=Image.Resampling.NEAREST, box=(0, 0, 128, 128)
+        ),
+        source_image.resize(
+            (256, 256), resample=Image.Resampling.NEAREST, box=(128, 0, 256, 128)
+        ),
+        source_image.resize(
+            (256, 256), resample=Image.Resampling.NEAREST, box=(0, 128, 128, 256)
+        ),
+        source_image.resize(
+            (256, 256), resample=Image.Resampling.NEAREST, box=(128, 128, 256, 256)
+        ),
+    ]
+    return upsized_images
+
+
+def create_upsized_images_for_this_tile(zoom: int, x: int, y: int):
+    source_path = image_name_and_folder_handler(zoom, x, y)
+    source_tile = Image.open(source_path)
+
+    output_zoom_level = zoom + 1
+
+    images = upsize_image(source_tile)
+    assert len(images) == 4
+
+    image_paths = [
+        image_name_and_folder_handler(
+            output_zoom_level,
+            2 * x,
+            2 * y,
+        ),
+        image_name_and_folder_handler(
+            output_zoom_level,
+            2 * x + 1,
+            2 * y,
+        ),
+        image_name_and_folder_handler(
+            output_zoom_level,
+            2 * x,
+            2 * y + 1,
+        ),
+        image_name_and_folder_handler(
+            output_zoom_level,
+            2 * x + 1,
+            2 * y + 1,
+        ),
+    ]
+    images[0].save(image_paths[0])
+    images[1].save(image_paths[1])
+    images[2].save(image_paths[2])
+    images[3].save(image_paths[3])
+
+
+def image_name_and_folder_handler(zoom: int, x: int, y: int) -> str:
+    """"""
+    images_path = r"C:\repos\KJV_Search_Tools\static/tiles"
+    image_path_pattern = "{zoom}/{x}/{y}.png"
+
+    full_image_path = os.path.join(
+        images_path,
+        image_path_pattern.format_map(
+            {
+                "zoom": zoom,
+                "x": x,
+                "y": y,
+            }
+        ),
+    )
+
+    directory = os.path.dirname(full_image_path)
+
+    if not os.path.exists(directory):
+        os.makedirs(directory, exist_ok=True)
+    return full_image_path
+
+
+def get_zoom_x_y_from_tile_path(tile_path: str):
+    pattern = r"static\\tiles\\(?P<zoom>\d+)\\(?P<x>\d+)\\(?P<y>\d+).png"
+    new_map = re.search(pattern, tile_path).groupdict()
+    new_map["x"] = int(new_map["x"])
+    new_map["y"] = int(new_map["y"])
+    new_map["zoom"] = int(new_map["zoom"])
+    return new_map
+
+
+def generate_images_extra_zoom():
+    """Generates images that are just upscaled versions of quadrants of the original 256x256 tiles"""
+    zoom_levels = list(range(8, 10))  # [8, 9]
+    for zoom_level in zoom_levels:
+        source_zoom_level = zoom_level - 1
+        source_tiles = [
+            os.path.normpath(path)
+            for path in glob.glob(
+                f"C:/repos/KJV_Search_Tools/static/tiles/{source_zoom_level}/*/*.png"
+            )
+        ]
+        for source_tile_path in (pbar := tqdm(source_tiles, total=len(source_tiles))):
+            zoom_x_y = get_zoom_x_y_from_tile_path(source_tile_path)
+            create_upsized_images_for_this_tile(
+                zoom_x_y["zoom"],
+                zoom_x_y["x"],
+                zoom_x_y["y"],
+            )
+            pbar.update(1)
