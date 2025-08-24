@@ -2,7 +2,6 @@
 .chroma
 data
 dev*.ipynb
-img
 static/tiles
 static/tiles_leaflet
 tiles.zip

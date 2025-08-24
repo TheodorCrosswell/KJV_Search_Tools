@@ -68,4 +68,4 @@ def get_pixel_info(x: int, y: int):
 @app.get("/")
 async def read_index():
     """This is the map."""
-    return FileResponse("index.html")
+    return FileResponse("static/index.html")
