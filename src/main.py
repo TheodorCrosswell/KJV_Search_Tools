@@ -5,6 +5,9 @@ from contextlib import asynccontextmanager
 import polars as pl
 
 # C:\repos\KJV_Search_Tools\.venv\Scripts\python.exe -m fastapi dev C:\repos\KJV_Search_Tools\src\main.py
+# C:\repos\KJV_Search_Tools\.venv\Scripts\python.exe -m uvicorn src.main:app --host 0.0.0.0 --port 8000
+# docker hub theodorcrosswell/kjv-similartity-map:latest
+
 # This acts as a simple in-memory database
 app_data = {}
 
