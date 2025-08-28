@@ -45,8 +45,14 @@ map.on('click', function(e) {
 
     // The result from project() is an object with x and y properties.
     // We need to round them to get integer coordinates for the API call.
-    const x = Math.floor(pixelCoords.x);
-    const y = Math.floor(pixelCoords.y);
+    const min = 1;
+    const max = 31102;
+
+    let x = Math.floor(pixelCoords.x) + 1;
+    let y = Math.floor(pixelCoords.y) + 1;
+
+    x = Math.min(Math.max(x, min), max);
+    y = Math.min(Math.max(y, min), max);
 
     // Construct the URL for our FastAPI endpoint
     const apiUrl = `/api/pixel_info/${x}/${y}`;
