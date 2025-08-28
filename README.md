@@ -58,7 +58,7 @@ To run it as a docker image:
     ```
 2.  **Run the image as a container:**
     ```bash
-    docker run theodorcrosswell/kjv-similarity-map:latest
+    docker run -p 8000:8000 --name kjv-similarity-map kjv-similarity-map:latest  
     ```
 3.  **Open 127.0.0.1:8000 in your web browser.**
 
