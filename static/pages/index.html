@@ -13,24 +13,74 @@
         body {
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 20px;
             background-color: #f4f4f4;
+        }
+
+        /* Sidebar Styles (Right-aligned) */
+        #sidebar {
+            height: 100%;
+            width: 300px;
+            position: fixed;
+            top: 0;
+            right: 0;
+            background-color: #fff;
+            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+            /* --- FIX --- Increased z-index to be above Leaflet controls */
+            z-index: 1010;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        #sidebar.open {
+            transform: translateX(0);
+        }
+
+        /* Toggle Button Styles (Right-aligned) */
+        #sidebar-toggle {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            /* --- FIX --- Increased z-index to be above the sidebar */
+            z-index: 1011;
+            cursor: pointer;
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 8px 12px;
+            font-size: 18px;
+        }
+
+        /* Main Content Styles */
+        #main-content {
+            padding: 20px;
         }
 
         #map {
             height: 400px;
-            /* Example height for the map */
             background-color: #e0e0e0;
             margin-bottom: 30px;
             border-radius: 8px;
         }
 
-        .color-controls {
+        /* Styles for controls moved into the sidebar */
+        #sidebar .color-controls,
+        #sidebar #pan-controls {
             margin-bottom: 20px;
-            padding: 15px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 0;
+            background-color: transparent;
+            border-radius: 0;
+            box-shadow: none;
+        }
+
+        #sidebar #pan-controls input {
+            width: calc(100% - 20px);
+            margin-bottom: 10px;
+        }
+
+        #sidebar #pan-controls button {
+            width: 100%;
         }
 
         .control-group {
@@ -45,6 +95,8 @@
         select,
         input[type="range"] {
             margin-right: 20px;
+            width: calc(100% - 100px);
+            /* Adjust width for sidebar */
         }
 
         .slider-group {
@@ -62,12 +114,11 @@
 </head>
 
 <body>
-    <!-- This div is where the map will be rendered -->
-    <div id="map"></div>
 
-    <details class="color-controls">
-        <summary>Color Controls</summary>
-        <br>
+    <button id="sidebar-toggle">☰ Controls</button>
+
+    <div id="sidebar">
+        <h3>Color</h3>
         <div class="control-group">
             <label for="color-presets">Presets:</label>
             <select id="color-presets">
@@ -79,7 +130,7 @@
             </select>
         </div>
         <div class="control-group">
-            <h4>Manual Adjustment</h4>
+            <h4>Manual Selection</h4>
             <div class="slider-group">
                 <label for="hue-slider">Hue:</label>
                 <input type="range" id="hue-slider" min="0" max="360" value="0">
@@ -102,93 +153,119 @@
             </div>
         </div>
         <button id="reset-filters">Reset Filters</button>
-    </details>
+        <hr>
+        <!-- Pan Controls moved here -->
+        <div id="pan-controls">
+            <h3>Pan to Coordinate</h3>
+            <label for="x-coord">X:</label>
+            <input type="number" id="x-coord" placeholder="Enter X coordinate">
+            <label for="y-coord">Y:</label>
+            <input type="number" id="y-coord" placeholder="Enter Y coordinate">
+            <button id="pan-button">Pan to Coordinate</button>
+        </div>
+    </div>
 
-    <div>
-        <h3>Links to Churches</h3>
-        <ul>
-            <li><a href="https://www.faithfulwordbaptist.org/page5.html">Faithful Word Baptist Church</a></li>
-            <li><a href="https://sbckjv.com/gospel/">Stedfast Baptist Church</a></li>
-            <li><a href="https://anchorkjv.com/">Anchor Baptist Church</a></li>
-        </ul>
-    </div>
-    <div>
-        <h3>How to Use the Interactive Map</h3>
-        <p>The Bible Verse Similarity Map is a visual representation of the entire King James Bible. Each pixel on the
-            map
-            represents a comparison between two verses. The darker the pixel, the more similar the verses are in their
-            meaning.
-        </p>
-        <ul>
-            <li><strong>Navigating the Map:</strong> You can explore the map by using your mouse to click and drag,
-                panning
-                across the map.</li>
-            <li><strong>Zooming In and Out:</strong> To get a closer look at specific areas of interest or to see the
-                bigger
-                picture, use the scroll wheel on your mouse or the <code>+</code> and <code>-</code> controls on the map
-                to zoom
-                in and out. As you zoom in, you will see more detailed relationships between smaller sets of verses.
-            </li>
-            <li><strong>Discovering Verse Connections:</strong> The core feature of this tool is the ability to see the
-                specific
-                verses behind each pixel. Click on any point on the map to reveal the two verses being compared. Their
-                text will
-                be displayed, allowing you to read and compare them directly. This feature enables you to uncover
-                thematic and
-                semantic links between different parts of the Bible.</li>
-        </ul>
-        <br>
-        <h3>How the Map was Made</h3>
-        <p>This interactive map is the result of transforming the biblical text into a visual format. Here’s a
-            simplified
-            explanation of the steps involved:</p>
-        <ol>
-            <li><strong>Understanding the Verses:</strong> First, every single verse in the King James Bible was fed
-                into a
-                computer model that is trained to understand the meaning of sentences. This model, called a
-                sentence-embedding
-                model, converts each verse into a unique set of numbers, known as a vector. This numerical
-                representation
-                captures the verse's essence.</li>
-            <li><strong>Comparing Every Verse:</strong> With each verse represented by numbers, they can be
-                mathematically
-                compared. A similarity score was calculated for every possible pair of verses in the Bible, resulting in
-                a
-                dataset that quantifies the relationships between them.</li>
-            <li><strong>Visualizing the Similarities:</strong> These similarity scores were then used to generate a grid
-                of
-                image tiles. Each pixel in these tiles corresponds to a unique pair of verses, and its color is
-                determined by
-                how similar those two verses are. The darker the pixel, the higher the similarity score.</li>
-            <li><strong>Creating the Interactive Experience:</strong> These image tiles are served to you through an
-                interactive
-                map interface, built with Leaflet.js. This technology allows you to fluidly zoom and pan across the 1
-                million
-                verse comparisons, making the exploration of these biblical connections both intuitive and engaging.
-            </li>
-        </ol>
-        <p>The entire project is powered by a combination of modern web technologies. A FastAPI backend handles the
-            data, while
-            the user-friendly front end is built with HTML, CSS, and JavaScript. The complex data processing and storage
-            are
-            managed by tools like Polars, ChromaDB, and NumPy, with the final image tiles being generated using Pillow.
-        </p>
-    </div>
-    <div>
-        <h3>Contact Links</h3>
-        <ul>
-            <li><a href="https://github.com/TheodorCrosswell">Github Profile</a></li>
-            <li><a href="https://www.linkedin.com/in/theodor-crosswell-a08b4a2a5/">LinkedIn</a></li>
-        </ul>
-    </div>
-    <div>
-        <h3>Project Links</h3>
-        <ul>
-            <li><a href="https://hub.docker.com/repository/docker/theodorcrosswell/kjv-similarity-map/general">Docker
-                    Repo</a></li>
-            <li><a href="https://huggingface.co/datasets/Theodor-Crosswell/KJV_Similarity">Hugging Face Repo</a></li>
-            <li><a href="https://github.com/TheodorCrosswell/KJV_Search_Tools">Project Github Repo</a></li>
-        </ul>
+    <div id="main-content">
+        <!-- This div is where the map will be rendered -->
+        <div id="map"></div>
+
+        <div>
+            <h3>Links to Churches</h3>
+            <ul>
+                <li><a href="https://www.faithfulwordbaptist.org/page5.html">Faithful Word Baptist Church</a></li>
+                <li><a href="https://sbckjv.com/gospel/">Stedfast Baptist Church</a></li>
+                <li><a href="https://anchorkjv.com/">Anchor Baptist Church</a></li>
+            </ul>
+        </div>
+        <div>
+            <h3>How to Use the Interactive Map</h3>
+            <p>The Bible Verse Similarity Map is a visual representation of the entire King James Bible. Each pixel on
+                the
+                map
+                represents a comparison between two verses. The darker the pixel, the more similar the verses are in
+                their
+                meaning.
+            </p>
+            <ul>
+                <li><strong>Navigating the Map:</strong> You can explore the map by using your mouse to click and drag,
+                    panning
+                    across the map.</li>
+                <li><strong>Zooming In and Out:</strong> To get a closer look at specific areas of interest or to see
+                    the
+                    bigger
+                    picture, use the scroll wheel on your mouse or the <code>+</code> and <code>-</code> controls on the
+                    map
+                    to zoom
+                    in and out. As you zoom in, you will see more detailed relationships between smaller sets of verses.
+                </li>
+                <li><strong>Discovering Verse Connections:</strong> The core feature of this tool is the ability to see
+                    the
+                    specific
+                    verses behind each pixel. Click on any point on the map to reveal the two verses being compared.
+                    Their
+                    text will
+                    be displayed, allowing you to read and compare them directly. This feature enables you to uncover
+                    thematic and
+                    semantic links between different parts of the Bible.</li>
+            </ul>
+            <h3>How the Map was Made</h3>
+            <p>This interactive map is the result of transforming the biblical text into a visual format. Here’s a
+                simplified
+                explanation of the steps involved:</p>
+            <ol>
+                <li><strong>Understanding the Verses:</strong> First, every single verse in the King James Bible was fed
+                    into a
+                    computer model that is trained to understand the meaning of sentences. This model, called a
+                    sentence-embedding
+                    model, converts each verse into a unique set of numbers, known as a vector. This numerical
+                    representation
+                    captures the verse's essence.</li>
+                <li><strong>Comparing Every Verse:</strong> With each verse represented by numbers, they can be
+                    mathematically
+                    compared. A similarity score was calculated for every possible pair of verses in the Bible,
+                    resulting in
+                    a
+                    dataset that quantifies the relationships between them.</li>
+                <li><strong>Visualizing the Similarities:</strong> These similarity scores were then used to generate a
+                    grid
+                    of
+                    image tiles. Each pixel in these tiles corresponds to a unique pair of verses, and its color is
+                    determined by
+                    how similar those two verses are. The darker the pixel, the higher the similarity score.</li>
+                <li><strong>Creating the Interactive Experience:</strong> These image tiles are served to you through an
+                    interactive
+                    map interface, built with Leaflet.js. This technology allows you to fluidly zoom and pan across the
+                    1
+                    million
+                    verse comparisons, making the exploration of these biblical connections both intuitive and engaging.
+                </li>
+            </ol>
+            <p>The entire project is powered by a combination of modern web technologies. A FastAPI backend handles the
+                data, while
+                the user-friendly front end is built with HTML, CSS, and JavaScript. The complex data processing and
+                storage
+                are
+                managed by tools like Polars, ChromaDB, and NumPy, with the final image tiles being generated using
+                Pillow.
+            </p>
+        </div>
+        <div>
+            <h3>Contact Links</h3>
+            <ul>
+                <li><a href="https://github.com/TheodorCrosswell">Github Profile</a></li>
+                <li><a href="https://www.linkedin.com/in/theodor-crosswell-a08b4a2a5/">LinkedIn</a></li>
+            </ul>
+        </div>
+        <div>
+            <h3>Project Links</h3>
+            <ul>
+                <li><a href="https://hub.docker.com/repository/docker/theodorcrosswell/kjv-similarity-map/general">Docker
+                        Repo</a></li>
+                <li><a href="https://huggingface.co/datasets/Theodor-Crosswell/KJV_Similarity">Hugging Face Repo</a>
+                </li>
+                <li><a href="https://github.com/TheodorCrosswell/KJV_Search_Tools">Project Github Repo</a></li>
+            </ul>
+        </div>
     </div>
 
 
@@ -198,6 +275,13 @@
     <script src='/static/scripts/leaflet_fullscreen/dist/Leaflet.fullscreen.min.js'></script>
     <!-- Include the custom JavaScript file -->
     <script src="/static/scripts/map/app.js"></script>
+
+    <!-- JavaScript to control the sidebar -->
+    <script>
+        document.getElementById('sidebar-toggle').addEventListener('click', function () {
+            document.getElementById('sidebar').classList.toggle('open');
+        });
+    </script>
 </body>
 
 </html>
