@@ -24,12 +24,86 @@
             margin-bottom: 30px;
             border-radius: 8px;
         }
+
+        .color-controls {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .control-group {
+            margin-bottom: 10px;
+        }
+
+        label {
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        select,
+        input[type="range"] {
+            margin-right: 20px;
+        }
+
+        .slider-group {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            gap: 10px;
+        }
+
+        summary {
+            cursor: pointer;
+            font-weight: bold;
+        }
     </style>
 </head>
 
 <body>
     <!-- This div is where the map will be rendered -->
     <div id="map"></div>
+
+    <details class="color-controls">
+        <summary>Color Controls</summary>
+        <br>
+        <div class="control-group">
+            <label for="color-presets">Presets:</label>
+            <select id="color-presets">
+                <option value="none">Default</option>
+                <option value="sepia(100%) hue-rotate(0deg) saturate(200%) brightness(90%)">Sepia</option>
+                <option value="sepia(100%) hue-rotate(90deg) saturate(200%) brightness(90%)">Jungle</option>
+                <option value="sepia(100%) hue-rotate(180deg) saturate(120%) brightness(90%)">Ocean</option>
+                <option value="sepia(100%) hue-rotate(270deg) saturate(180%) brightness(90%)">Pink</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <h4>Manual Adjustment</h4>
+            <div class="slider-group">
+                <label for="hue-slider">Hue:</label>
+                <input type="range" id="hue-slider" min="0" max="360" value="0">
+                <span id="hue-value">0deg</span>
+            </div>
+            <div class="slider-group">
+                <label for="sepia-slider">Sepia:</label>
+                <input type="range" id="sepia-slider" min="0" max="100" value="0">
+                <span id="sepia-value">0%</span>
+            </div>
+            <div class="slider-group">
+                <label for="saturate-slider">Saturation:</label>
+                <input type="range" id="saturate-slider" min="0" max="200" value="100">
+                <span id="saturate-value">100%</span>
+            </div>
+            <div class="slider-group">
+                <label for="brightness-slider">Brightness:</label>
+                <input type="range" id="brightness-slider" min="0" max="200" value="100">
+                <span id="brightness-value">100%</span>
+            </div>
+        </div>
+        <button id="reset-filters">Reset Filters</button>
+    </details>
+
     <div>
         <h3>Links to Churches</h3>
         <ul>
@@ -99,7 +173,8 @@
             are
             managed by tools like Polars, ChromaDB, and NumPy, with the final image tiles being generated using Pillow.
         </p>
-    </div><div>
+    </div>
+    <div>
         <h3>Contact Links</h3>
         <ul>
             <li><a href="https://github.com/TheodorCrosswell">Github Profile</a></li>
