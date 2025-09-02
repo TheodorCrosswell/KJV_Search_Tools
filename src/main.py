@@ -26,7 +26,7 @@ async def lifespan(app: FastAPI):
     # --- Code to run on startup ---
     # Load the verse details lookup table
     app_data["verse_info"] = (
-        pl.read_csv("static/kjv.csv")
+        pl.read_csv("static/kjv/kjv.csv")
         .select(["citation", "text"])
         .rename({"citation": "Verse"})
     )
@@ -89,10 +89,10 @@ def get_pixel_info(x: int, y: int, request: Request):  # We must add request: Re
 @app.get("/")
 async def read_index():
     """This is the map."""
-    return FileResponse("static/index.html")
+    return FileResponse("static/pages/index.html")
 
 
 @app.get("/favicon.ico")
 async def read_index():
-    """This is the map."""
-    return FileResponse("static/kjv.png")
+    """This is the favicon."""
+    return FileResponse("static/favicon/kjv.png")

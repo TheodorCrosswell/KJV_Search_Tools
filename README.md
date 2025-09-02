@@ -58,10 +58,9 @@ To run it as a docker image:
     ```
 2.  **Run the image as a container:**
     ```bash
-    docker run -p 8000:8000 --name kjv-similarity-map kjv-similarity-map:latest  
+    docker run -p 8000:8000 --name kjv-similarity-map kjv-similarity-map:latest
     ```
 3.  **Open 127.0.0.1:8000 in your web browser.**
-
 
 To run this project locally, you will need to have Python installed on your machine.
 
@@ -84,3 +83,9 @@ To run this project locally, you will need to have Python installed on your mach
 4.  **Open 127.0.0.1:8000 in your web browser.**
 
 You should now be able to interact with the Bible Verse Similarity Map on your local machine.
+
+## Source Data
+
+I extracted the verses and citations from an existing KJV Bible .csv file. I then embedded each verse and created a dataset of each comparison. I then converted that dataset into map tiles, which are served through the website as a map.
+
+Find the dataset here: https://huggingface.co/datasets/Theodor-Crosswell/KJV_Similarity
