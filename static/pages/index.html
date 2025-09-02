@@ -6,9 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KJV Similarity Map</title>
     <!-- Include the Leaflet CSS library -->
-    <link rel="stylesheet" href="/static/scripts/leaflet/dist/leaflet.css"/>
+    <link rel="stylesheet" href="/static/scripts/leaflet/dist/leaflet.css" />
     <!-- Include the Leaflet Fullscreen Plugin CSS library -->
-    <link rel='stylesheet' href='/static/scripts/leaflet_fullscreen/dist/leaflet.fullscreen.css'/>
+    <link rel='stylesheet' href='/static/scripts/leaflet_fullscreen/dist/leaflet.fullscreen.css' />
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -30,44 +30,89 @@
 <body>
     <!-- This div is where the map will be rendered -->
     <div id="map"></div>
-    <div><h3>How to Use the Interactive Map</h3>
-    <p>The Bible Verse Similarity Map is a visual representation of the entire King James Bible. Each pixel on the map
-        represents a comparison between two verses. The darker the pixel, the more similar the verses are in their meaning.
-    </p>
-    <ul>
-        <li><strong>Navigating the Map:</strong> You can explore the map by using your mouse to click and drag, panning
-            across the map.</li>
-        <li><strong>Zooming In and Out:</strong> To get a closer look at specific areas of interest or to see the bigger
-            picture, use the scroll wheel on your mouse or the <code>+</code> and <code>-</code> controls on the map to zoom
-            in and out. As you zoom in, you will see more detailed relationships between smaller sets of verses.</li>
-        <li><strong>Discovering Verse Connections:</strong> The core feature of this tool is the ability to see the specific
-            verses behind each pixel. Click on any point on the map to reveal the two verses being compared. Their text will
-            be displayed, allowing you to read and compare them directly. This feature enables you to uncover thematic and
-            semantic links between different parts of the Bible.</li>
-    </ul>
-    <br>
-    <h3>How the Map Was Created and How It Works</h3>
-    <p>This interactive map is the result of transforming the biblical text into a visual format. Here’s a simplified
-        explanation of the steps involved:</p>
-    <ol>
-        <li><strong>Understanding the Verses:</strong> First, every single verse in the King James Bible was fed into a
-            computer model that is trained to understand the meaning of sentences. This model, called a sentence-embedding
-            model, converts each verse into a unique set of numbers, known as a vector. This numerical representation
-            captures the verse's essence.</li>
-        <li><strong>Comparing Every Verse:</strong> With each verse represented by numbers, they can be mathematically
-            compared. A similarity score was calculated for every possible pair of verses in the Bible, resulting in a
-            dataset that quantifies the relationships between them.</li>
-        <li><strong>Visualizing the Similarities:</strong> These similarity scores were then used to generate a grid of
-            image tiles. Each pixel in these tiles corresponds to a unique pair of verses, and its color is determined by
-            how similar those two verses are. The darker the pixel, the higher the similarity score.</li>
-        <li><strong>Creating the Interactive Experience:</strong> These image tiles are served to you through an interactive
-            map interface, built with Leaflet.js. This technology allows you to fluidly zoom and pan across the 1 million
-            verse comparisons, making the exploration of these biblical connections both intuitive and engaging.</li>
-    </ol>
-    <p>The entire project is powered by a combination of modern web technologies. A FastAPI backend handles the data, while
-        the user-friendly front end is built with HTML, CSS, and JavaScript. The complex data processing and storage are
-        managed by tools like Polars, ChromaDB, and NumPy, with the final image tiles being generated using Pillow.</p>
+    <div>
+        <h3>Links to Churches</h3>
+        <ul>
+            <li><a href="https://www.faithfulwordbaptist.org/page5.html">Faithful Word Baptist Church</a></li>
+            <li><a href="https://sbckjv.com/gospel/">Stedfast Baptist Church</a></li>
+            <li><a href="https://anchorkjv.com/">Anchor Baptist Church</a></li>
+        </ul>
     </div>
+    <div>
+        <h3>How to Use the Interactive Map</h3>
+        <p>The Bible Verse Similarity Map is a visual representation of the entire King James Bible. Each pixel on the
+            map
+            represents a comparison between two verses. The darker the pixel, the more similar the verses are in their
+            meaning.
+        </p>
+        <ul>
+            <li><strong>Navigating the Map:</strong> You can explore the map by using your mouse to click and drag,
+                panning
+                across the map.</li>
+            <li><strong>Zooming In and Out:</strong> To get a closer look at specific areas of interest or to see the
+                bigger
+                picture, use the scroll wheel on your mouse or the <code>+</code> and <code>-</code> controls on the map
+                to zoom
+                in and out. As you zoom in, you will see more detailed relationships between smaller sets of verses.
+            </li>
+            <li><strong>Discovering Verse Connections:</strong> The core feature of this tool is the ability to see the
+                specific
+                verses behind each pixel. Click on any point on the map to reveal the two verses being compared. Their
+                text will
+                be displayed, allowing you to read and compare them directly. This feature enables you to uncover
+                thematic and
+                semantic links between different parts of the Bible.</li>
+        </ul>
+        <br>
+        <h3>How the Map Was Created and How It Works</h3>
+        <p>This interactive map is the result of transforming the biblical text into a visual format. Here’s a
+            simplified
+            explanation of the steps involved:</p>
+        <ol>
+            <li><strong>Understanding the Verses:</strong> First, every single verse in the King James Bible was fed
+                into a
+                computer model that is trained to understand the meaning of sentences. This model, called a
+                sentence-embedding
+                model, converts each verse into a unique set of numbers, known as a vector. This numerical
+                representation
+                captures the verse's essence.</li>
+            <li><strong>Comparing Every Verse:</strong> With each verse represented by numbers, they can be
+                mathematically
+                compared. A similarity score was calculated for every possible pair of verses in the Bible, resulting in
+                a
+                dataset that quantifies the relationships between them.</li>
+            <li><strong>Visualizing the Similarities:</strong> These similarity scores were then used to generate a grid
+                of
+                image tiles. Each pixel in these tiles corresponds to a unique pair of verses, and its color is
+                determined by
+                how similar those two verses are. The darker the pixel, the higher the similarity score.</li>
+            <li><strong>Creating the Interactive Experience:</strong> These image tiles are served to you through an
+                interactive
+                map interface, built with Leaflet.js. This technology allows you to fluidly zoom and pan across the 1
+                million
+                verse comparisons, making the exploration of these biblical connections both intuitive and engaging.
+            </li>
+        </ol>
+        <p>The entire project is powered by a combination of modern web technologies. A FastAPI backend handles the
+            data, while
+            the user-friendly front end is built with HTML, CSS, and JavaScript. The complex data processing and storage
+            are
+            managed by tools like Polars, ChromaDB, and NumPy, with the final image tiles being generated using Pillow.
+        </p>
+    </div>
+    <div>
+        <h3>Project & Contact Links</h3>
+        <ul>
+            <li><a href="https://github.com/TheodorCrosswell">Github Profile</a></li>
+            <li><a href="https://www.linkedin.com/in/theodor-crosswell-a08b4a2a5/">LinkedIn</a></li>
+            <br>
+            <li><a href="https://hub.docker.com/repository/docker/theodorcrosswell/kjv-similarity-map/general">Docker
+                    Repo</a></li>
+            <li><a href="https://huggingface.co/datasets/Theodor-Crosswell/KJV_Similarity">Hugging Face Repo</a></li>
+            <li><a href="https://github.com/TheodorCrosswell/KJV_Search_Tools">Project Github Repo</a></li>
+        </ul>
+    </div>
+
 
     <!-- Include the Leaflet JavaScript library -->
     <script src="/static/scripts/leaflet/dist/leaflet.js"></script>
