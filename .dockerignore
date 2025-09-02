@@ -14,8 +14,7 @@ Dockerfile
 .venv/
 data/
 __init__.py
-dev.ipynb
-dev2.ipynb
+*.ipynb
 helpers.py
 KJV_Search_Tools.py
 static/*.zip
