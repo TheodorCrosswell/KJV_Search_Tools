@@ -3,7 +3,8 @@
 // Create a new Leaflet map instance and attach it to the 'map' div
 const map = L.map('map', {
     crs: L.CRS.Simple,
-    minZoom: 0
+    minZoom: 0,
+    fullscreenControl: true,
 });
 
 // Define the pixel boundaries of the image at its native zoom level
