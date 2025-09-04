@@ -2,14 +2,17 @@ from fastapi import FastAPI, Request, Depends
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from contextlib import asynccontextmanager
-import polars as pl
-
-# --- Rate Limiting Imports ---
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
+import polars as pl
 
-# This acts as a simple in-memory database
+# To start in server in development mode:
+#  ./.venv/Scripts/python.exe -m fastapi dev ./src/main.py
+# To start server in production mode:
+# ./.venv/Scripts/python.exe -m uvicorn src.main:app --host 0.0.0.0 --port 8000
+
+# This acts as an in-memory database
 app_data = {}
 
 # --- Rate Limiting Setup ---
@@ -49,19 +52,17 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
-# keep this mounted so it can serve index.html and tiles and app.js
+# Serve index.html, app.js, scripts, and tiles.
 app.mount("/static", StaticFiles(directory="static"), name="static")
-# This one is redundant since /static already covers it.
-# app.mount("/static/tiles", StaticFiles(directory="static/tiles"), name="tiles")
 
 
+# TODO: consider moving this to client-side processing to avoid loading the server much.
 @app.get("/api/pixel_info/{x}/{y}")
-# 4. Apply the rate limit to this endpoint.
-#    We use Depends() to inject the rate limit check.
-#    The string "20/minute" means 20 requests are allowed per minute per IP.
 @limiter.limit("1/second")
-def get_pixel_info(x: int, y: int, request: Request):  # We must add request: Request
-    """This is used to get the verse address for the clicked pixel."""
+def get_pixel_info(x: int, y: int, request: Request):
+    """This is used to get the verse addresses for the clicked pixel.
+    - x: the index of verse x
+    - y: the index of verse y"""
     verse_df = pl.DataFrame(app_data["verse_info"])
 
     # Make sure verse_id is a valid index
@@ -88,7 +89,7 @@ def get_pixel_info(x: int, y: int, request: Request):  # We must add request: Re
 
 @app.get("/")
 async def read_index():
-    """This is the map."""
+    """This is the main page."""
     return FileResponse("static/pages/index.html")
 
 

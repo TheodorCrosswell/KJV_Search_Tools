@@ -5,10 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KJV Similarity Map</title>
+
     <!-- Include the Leaflet CSS library -->
     <link rel="stylesheet" href="/static/scripts/leaflet/dist/leaflet.css" />
     <!-- Include the Leaflet Fullscreen Plugin CSS library -->
     <link rel='stylesheet' href='/static/scripts/leaflet_fullscreen/dist/leaflet.fullscreen.css' />
+    
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -16,7 +18,6 @@
             background-color: #f4f4f4;
         }
 
-        /* Sidebar Styles (Right-aligned) */
         #sidebar {
             height: 100%;
             width: 300px;
@@ -27,7 +28,6 @@
             box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
             transform: translateX(100%);
             transition: transform 0.3s ease-in-out;
-            /* --- FIX --- Increased z-index to be above Leaflet controls */
             z-index: 1010;
             padding: 20px;
             overflow-y: auto;
@@ -37,12 +37,10 @@
             transform: translateX(0);
         }
 
-        /* Toggle Button Styles (Right-aligned) */
         #sidebar-toggle {
             position: fixed;
             top: 15px;
             right: 15px;
-            /* --- FIX --- Increased z-index to be above the sidebar */
             z-index: 1011;
             cursor: pointer;
             background: #fff;
@@ -52,7 +50,6 @@
             font-size: 18px;
         }
 
-        /* Main Content Styles */
         #main-content {
             padding: 20px;
         }
@@ -64,7 +61,6 @@
             border-radius: 8px;
         }
 
-        /* Styles for controls moved into the sidebar */
         #sidebar .color-controls,
         #sidebar #pan-controls {
             margin-bottom: 20px;
@@ -96,7 +92,6 @@
         input[type="range"] {
             margin-right: 20px;
             width: calc(100% - 100px);
-            /* Adjust width for sidebar */
         }
 
         .slider-group {
@@ -154,7 +149,7 @@
         </div>
         <button id="reset-filters">Reset Filters</button>
         <hr>
-        <!-- Pan Controls moved here -->
+        <!-- Pan Controls -->
         <div id="pan-controls">
             <h3>Pan to Coordinate</h3>
             <label for="x-coord">X:</label>
@@ -193,7 +188,7 @@
                 <li><strong>Zooming In and Out:</strong> To get a closer look at specific areas of interest or to see
                     the
                     bigger
-                    picture, use the scroll wheel on your mouse or the <code>+</code> and <code>-</code> controls on the
+                    picture, use the scroll wheel on your mouse or the + and - controls on the
                     map
                     to zoom
                     in and out. As you zoom in, you will see more detailed relationships between smaller sets of verses.
@@ -263,7 +258,7 @@
                         Repo</a></li>
                 <li><a href="https://huggingface.co/datasets/Theodor-Crosswell/KJV_Similarity">Hugging Face Repo</a>
                 </li>
-                <li><a href="https://github.com/TheodorCrosswell/KJV_Search_Tools">Project Github Repo</a></li>
+                <li><a href="https://github.com/TheodorCrosswell/KJV_Search_Tools">Github Repo</a></li>
             </ul>
         </div>
     </div>
