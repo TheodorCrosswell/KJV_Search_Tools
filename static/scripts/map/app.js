@@ -31,7 +31,7 @@ const tileLayer = L.tileLayer(tileUrl, {
     maxNativeZoom: 9, // 7 is native resolution, 9 is a 64x64px image upscaled to 256, to enable more zooming.
     tileSize: 256,
     noWrap: true,
-    attribution: 'KJV Dataset by <a href="https://github.com/TheodorCrosswell" target="_blank">Theodor Crosswell', // I made the tiles and distances dataset.
+    attribution: '<a href="https://huggingface.co/datasets/Theodor-Crosswell/KJV_Similarity" target="_blank">KJV Dataset</a> by <a href="https://github.com/TheodorCrosswell" target="_blank">Theodor Crosswell</a>', // I made the tiles and distances dataset.
     bounds: imageLatLngBounds, // To prevent the page from requesting nonexistent tiles from the server.
 });
 tileLayer.addTo(map);
