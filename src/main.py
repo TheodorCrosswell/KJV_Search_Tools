@@ -7,6 +7,7 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 import polars as pl
 import json
+from chromadb import PersistentClient, Collection
 
 # To start in server in development mode:
 #  ./.venv/Scripts/python.exe -m fastapi dev ./src/main.py
@@ -35,9 +36,13 @@ async def lifespan(app: FastAPI):
         {"citation": "Verse"}
     )
 
-    # Assemble the final structure for this book
+    # Load verse_selector_data from JSON file
     with open("static/kjv/verse_selector_data.json") as file:
         app_data["verse_selector_data"] = json.load(file)
+
+    app_data["chroma_collection"] = PersistentClient(".chroma").get_collection(
+        "kjv_verses"
+    )
 
     print("Data loaded successfully.")
 
@@ -96,6 +101,20 @@ def get_pixel_info(x: int, y: int, request: Request):
 @app.get("/api/verse_selector_data")
 async def get_verse_selector_data():
     return app_data["verse_selector_data"]
+
+
+@app.get("/api/verse_similarity_search/{verse_id}/{limit}")
+async def get_verse_similarity_results(verse_id: int, limit: int = 10):
+    collection = app_data["chroma_collection"]
+    # collection = Collection()
+    embeddings = collection.get(
+        where={"verse_id": {"$eq": verse_id}}, include=["embeddings"]
+    )["embeddings"]
+    results = collection.query(
+        query_embeddings=embeddings, n_results=limit, include=["distances", "metadatas"]
+    )
+    print(results)
+    return "\n".join(results["ids"][0])
 
 
 @app.get("/")

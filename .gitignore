@@ -1,12 +1,9 @@
-# TODO: temporary while in development, to avoid uploading db every update. Remove when done with product.
+# To avoid uploading db every update.
 .chroma
 data
-dev*.ipynb
 static/tiles
-static/tiles_leaflet
-tiles.zip
-tiles_leaflet.zip
-tiles_10_layers.zip
+static/icons
+static/scripts/leaflet_easybutton
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -215,3 +212,8 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+
+# Exceptions
+
+!static/scripts/leaflet_fullscreen/dist/

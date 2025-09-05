@@ -36,6 +36,8 @@
 
     <!-- Include the Leaflet CSS library -->
     <link rel="stylesheet" href="/static/scripts/leaflet/dist/leaflet.css" />
+    <!-- Include the Leaflet EasyButton CSS library -->
+    <link rel="stylesheet" href="/static/scripts/leaflet_easybutton/easy-button.css" />
     <!-- Include the Leaflet Fullscreen Plugin CSS library -->
     <link rel='stylesheet' href='/static/scripts/leaflet_fullscreen/dist/leaflet.fullscreen.css' />
     
@@ -155,9 +157,9 @@
             <select id="verse-select" disabled>
                 <option value="">Select a Verse</option>
             </select>
-        
+
             <button id="match-button">Find closest matches</button>
-            <br><br><br>
+            <h2 id="verse_coord">Coordinate will go here</h2>
         </div>
         <div class="control-group">
             <h3>Color</h3>
@@ -310,11 +312,14 @@
 
     <!-- Include the Leaflet JavaScript library -->
     <script src="/static/scripts/leaflet/dist/leaflet.js"></script>
+    <!-- Include the Leaflet EasyButton Plugin -->
+    <script src="/static/scripts/leaflet_easybutton/easy-button.js"></script>
     <!-- Include the Leaflet Fullscreen Plugin -->
-    <script src='/static/scripts/leaflet_fullscreen/dist/Leaflet.fullscreen.min.js'></script>
+    <script src='/static/scripts/leaflet_fullscreen/dist/Leaflet.fullscreen.js'></script>
     <!-- Include the custom JavaScript files -->
     <script src="/static/scripts/custom/app.js"></script>
     <script src="/static/scripts/custom/map.js"></script>
+    <script src="/static/scripts/custom/map_custom_controls.js"></script>
 
     <!-- JavaScript to control the sidebar -->
     <script>
