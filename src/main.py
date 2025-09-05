@@ -6,6 +6,7 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 import polars as pl
+import json
 
 # To start in server in development mode:
 #  ./.venv/Scripts/python.exe -m fastapi dev ./src/main.py
@@ -34,38 +35,9 @@ async def lifespan(app: FastAPI):
         {"citation": "Verse"}
     )
 
-    app_data["verse_selector_data"] = {}
-
-    # Get a series of unique book names
-    unique_books = df.get_column("book_name").unique(maintain_order=True)
-
-    for book_name in unique_books:
-        # Filter the DataFrame for the current book
-        book_df = df.filter(pl.col("book_name") == book_name)
-
-        # Find the maximum chapter number for the book
-        max_chapter = book_df.get_column("chapter_number").max()
-
-        # Group by chapter to find the max verse in each chapter
-        verses_per_chapter_df = book_df.group_by(
-            "chapter_number", maintain_order=True
-        ).agg(pl.max("verse_number").alias("max_verse"))
-
-        # Convert the result to a dictionary {chapter: max_verse}
-        # Polars makes this easy by zipping the two columns.
-        # We cast chapter to string to match the desired JSON output format.
-        verses_dict = dict(
-            zip(
-                verses_per_chapter_df.get_column("chapter_number").cast(str),
-                verses_per_chapter_df.get_column("max_verse"),
-            )
-        )
-
-        # Assemble the final structure for this book
-        app_data["verse_selector_data"][book_name] = {
-            "chapters": max_chapter,
-            "verses": verses_dict,
-        }
+    # Assemble the final structure for this book
+    with open("static/kjv/verse_selector_data.json") as file:
+        app_data["verse_selector_data"] = json.load(file)
 
     print("Data loaded successfully.")
 
