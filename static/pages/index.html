@@ -2,9 +2,37 @@
 <html lang="en">
 
 <head>
+    <title>KJV Similarity Map</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta property="og:title" content=KJV Similarity Map>
+    <meta property="og:site_name" content=KJV Search Tools>
+    <meta property="og:url" content=kjv-search-tools.online>
+    <meta property="og:description" content="An open-source KJV Bible project">
+    <meta property="og:type" content=website>
+    <meta property="og:image" content=https://kjv-similarity-map-244276769903.us-south1.run.app/static/favicon/kjv.png>
+
+    <!-- HTML Meta Tags -->
     <title>KJV Similarity Map</title>
+    <meta name="description" content="">
+    
+    <!-- Facebook Meta Tags -->
+    <meta property="og:url" content="https://kjv-similarity-map-244276769903.us-south1.run.app/">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="KJV Similarity Map">
+    <meta property="og:description" content="">
+    <meta property="og:image" content="">
+    
+    <!-- Twitter Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta property="twitter:domain" content="kjv-similarity-map-244276769903.us-south1.run.app">
+    <meta property="twitter:url" content="https://kjv-similarity-map-244276769903.us-south1.run.app/">
+    <meta name="twitter:title" content="KJV Similarity Map">
+    <meta name="twitter:description" content="">
+    <meta name="twitter:image" content="">
+    
+    <!-- Meta Tags Generated via https://www.opengraph.xyz -->
 
     <!-- Include the Leaflet CSS library -->
     <link rel="stylesheet" href="/static/scripts/leaflet/dist/leaflet.css" />
@@ -174,7 +202,7 @@
         </div>
         <div>
             <h3>How to Use the Interactive Map</h3>
-            <p>The Bible Verse Similarity Map is a visual representation of the entire King James Bible. Each pixel on
+            <p>The Bible Verse Similarity Map is a visual representation of connections throughout the entire King James Bible. Each pixel on
                 the
                 map
                 represents a comparison between two verses. The darker the pixel, the more similar the verses are in
@@ -199,13 +227,11 @@
                     verses behind each pixel. Click on any point on the map to reveal the two verses being compared.
                     Their
                     text will
-                    be displayed, allowing you to read and compare them directly. This feature enables you to uncover
-                    thematic and
-                    semantic links between different parts of the Bible.</li>
+                    be displayed, allowing you to read and compare them directly.</li>
             </ul>
             <h3>How the Map was Made</h3>
             <p>This interactive map is the result of transforming the biblical text into a visual format. Here’s a
-                simplified
+                
                 explanation of the steps involved:</p>
             <ol>
                 <li><strong>Understanding the Verses:</strong> First, every single verse in the King James Bible was fed
@@ -241,7 +267,7 @@
                 storage
                 are
                 managed by tools like Polars, ChromaDB, and NumPy, with the final image tiles being generated using
-                Pillow.
+                Pillow and served in a map using Leaflet.
             </p>
         </div>
         <div>
