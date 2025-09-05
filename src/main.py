@@ -27,12 +27,46 @@ limiter = Limiter(key_func=get_remote_address)
 async def lifespan(app: FastAPI):
     """This loads the kjv.csv file into memory, allowing for fast retrieval of pixel_info"""
     # --- Code to run on startup ---
+    df = pl.read_csv("static/kjv/kjv.csv")
+
     # Load the verse details lookup table
-    app_data["verse_info"] = (
-        pl.read_csv("static/kjv/kjv.csv")
-        .select(["citation", "text"])
-        .rename({"citation": "Verse"})
+    app_data["verse_info"] = df.select(["citation", "text"]).rename(
+        {"citation": "Verse"}
     )
+
+    app_data["verse_selector_data"] = {}
+
+    # Get a series of unique book names
+    unique_books = df.get_column("book_name").unique(maintain_order=True)
+
+    for book_name in unique_books:
+        # Filter the DataFrame for the current book
+        book_df = df.filter(pl.col("book_name") == book_name)
+
+        # Find the maximum chapter number for the book
+        max_chapter = book_df.get_column("chapter_number").max()
+
+        # Group by chapter to find the max verse in each chapter
+        verses_per_chapter_df = book_df.group_by(
+            "chapter_number", maintain_order=True
+        ).agg(pl.max("verse_number").alias("max_verse"))
+
+        # Convert the result to a dictionary {chapter: max_verse}
+        # Polars makes this easy by zipping the two columns.
+        # We cast chapter to string to match the desired JSON output format.
+        verses_dict = dict(
+            zip(
+                verses_per_chapter_df.get_column("chapter_number").cast(str),
+                verses_per_chapter_df.get_column("max_verse"),
+            )
+        )
+
+        # Assemble the final structure for this book
+        app_data["verse_selector_data"][book_name] = {
+            "chapters": max_chapter,
+            "verses": verses_dict,
+        }
+
     print("Data loaded successfully.")
 
     yield  # The application runs while the lifespan function is yielded
@@ -85,6 +119,11 @@ def get_pixel_info(x: int, y: int, request: Request):
             "verse_y_id": y,
         }
     return result
+
+
+@app.get("/api/verse_selector_data")
+async def get_verse_selector_data():
+    return app_data["verse_selector_data"]
 
 
 @app.get("/")

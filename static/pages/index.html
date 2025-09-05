@@ -141,8 +141,26 @@
     <button id="sidebar-toggle">☰ Controls</button>
 
     <div id="sidebar">
-        <h3>Color</h3>
+        <div id="verse-selector">
+            <h3>Select a Bible Verse</h3>
+        
+            <select id="book-select">
+                <option value="">Select a Book</option>
+            </select>
+        
+            <select id="chapter-select" disabled>
+                <option value="">Select a Chapter</option>
+            </select>
+        
+            <select id="verse-select" disabled>
+                <option value="">Select a Verse</option>
+            </select>
+        
+            <button id="match-button">Find closest matches</button>
+            <br><br><br>
+        </div>
         <div class="control-group">
+            <h3>Color</h3>
             <label for="color-presets">Presets:</label>
             <select id="color-presets">
                 <option value="none">Default</option>
@@ -294,8 +312,9 @@
     <script src="/static/scripts/leaflet/dist/leaflet.js"></script>
     <!-- Include the Leaflet Fullscreen Plugin -->
     <script src='/static/scripts/leaflet_fullscreen/dist/Leaflet.fullscreen.min.js'></script>
-    <!-- Include the custom JavaScript file -->
-    <script src="/static/scripts/map/app.js"></script>
+    <!-- Include the custom JavaScript files -->
+    <script src="/static/scripts/custom/app.js"></script>
+    <script src="/static/scripts/custom/map.js"></script>
 
     <!-- JavaScript to control the sidebar -->
     <script>
