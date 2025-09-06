@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
+
+// Verse Selector
     const bookSelect = document.getElementById('book-select');
     const chapterSelect = document.getElementById('chapter-select');
     const verseSelect = document.getElementById('verse-select');
@@ -14,9 +16,18 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(data => {
             bibleData = data;
             populateBooks();
+            // Set the initial book to Genesis and populate chapters
+            bookSelect.value = 'Genesis';
+            populateChapters();
+            // Set the initial chapter to 1 and populate verses
+            chapterSelect.value = '1';
+            populateVerses();
+            // Set the initial verse to 1
+            verseSelect.value = '1';
         });
 
     function populateBooks() {
+        bookSelect.innerHTML = ''
         for (const book in bibleData) {
             const option = document.createElement('option');
             option.value = book;
@@ -25,10 +36,40 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function populateChapters() {
+        const selectedBook = bookSelect.value;
+        if (selectedBook) {
+            chapterSelect.innerHTML = '';
+            const bookInfo = bibleData[selectedBook];
+            for (let i = 1; i <= bookInfo.chapters; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                chapterSelect.appendChild(option);
+            }
+        }
+    }
+
+    function populateVerses() {
+        const selectedBook = bookSelect.value;
+        const selectedChapter = chapterSelect.value;
+
+        if (selectedBook && selectedChapter) {
+            verseSelect.innerHTML = '';
+            const versesInChapter = bibleData[selectedBook].verses[selectedChapter];
+            for (let i = 1; i <= versesInChapter; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                verseSelect.appendChild(option);
+            }
+        }
+    }
+
     function getVerseNumber() {
         const bookName = bookSelect.value;
         const chapter = +chapterSelect.value;
-        const verse = +verseSelect.value; // Unary Plus operator - converts string and other types to number.
+        const verse = +verseSelect.value; // Unary plus operator - converts string and other types to number.
 
         let verseCount = 0;
         const bookList = Object.keys(bibleData);
@@ -55,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Return the final count as we've found our verse
                 return verseCount
-            } 
+            }
             // If it's a book before the target book
             else {
                 // Add all verses from all chapters of the current book
@@ -67,50 +108,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     bookSelect.addEventListener('change', () => {
-        const selectedBook = bookSelect.value;
-        // chapterSelect.innerHTML = '<option value="1">1</option>';
-        // verseSelect.innerHTML = '<option value="1">1</option>';
-        chapterSelect.disabled = false;
-        verseSelect.disabled = false;
-
-        if (selectedBook) {
-            chapterSelect.innerHTML = '';
-            const bookInfo = bibleData[selectedBook];
-            for (let i = 1; i <= bookInfo.chapters; i++) {
-                const option = document.createElement('option');
-                option.value = i;
-                option.textContent = i;
-                chapterSelect.appendChild(option);
-            }
-            chapterSelect.disabled = false;
-        }
+        populateChapters();
+        // Also populate the verses for the first chapter of the new book
+        populateVerses();
     });
 
     chapterSelect.addEventListener('change', () => {
-        const selectedBook = bookSelect.value;
-        const selectedChapter = chapterSelect.value;
-        // verseSelect.innerHTML = '<option value="">1</option>';
-        verseSelect.disabled = false;
-
-        if (selectedBook && selectedChapter) {
-            verseSelect.innerHTML = '';
-            const versesInChapter = bibleData[selectedBook].verses[selectedChapter];
-            for (let i = 1; i <= versesInChapter; i++) {
-                const option = document.createElement('option');
-                option.value = i;
-                option.textContent = i;
-                verseSelect.appendChild(option);
-            }
-            verseSelect.disabled = false;
-        }
+        populateVerses();
     });
 
+
+    // Similarity Search
     function getVerseMatches() {         
         // We want the pixel coordinates at the zoom level that represents the original image size.
         const targetZoom = nativeZoom;
 
         // Construct the URL for our FastAPI endpoint
-        const verseSimilaritySearchApiUrl = `/api/verse_similarity_search/${getVerseNumber()}/10`;
+        const verseSimilaritySearchApiUrl = `/api/verse_similarity_search/${getVerseNumber()}/50`;
 
         // Use fetch to make the API call
         fetch(verseSimilaritySearchApiUrl)
@@ -186,10 +200,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     changelogContent += `## ${release.version}\n\n${release.notes}\n\n---\n\n`;
                 });
 
-                if (data.length > 5) {
-                    changelogContent += 'For a full list of changes, please visit the [GitHub releases page](https://github.com/your-username/your-repo/releases).\n';
-                }
-
+                changelogContent += 'For a full list of changes, please visit the [GitHub releases page](https://github.com/TheodorCrosswell/KJV_Search_Tools/releases).\n';
+                
                 showChangelogPopup(changelogContent);
                 localStorage.setItem('lastSeenChangelogVersion', currentVersion);
             }

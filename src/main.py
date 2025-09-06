@@ -103,7 +103,7 @@ async def get_verse_selector_data():
     return app_data["verse_selector_data"]
 
 
-@app.get("/api/verse_similarity_search/{verse_id}/{limit}")
+@app.get("/api/verse_similarity_search/{verse_id}/{n_results}")
 @limiter.limit("3/minute")
 async def get_verse_similarity_results(
     request: Request, verse_id: int, n_results: int = 10
@@ -136,14 +136,14 @@ async def get_verse_similarity_results(
     for i in range(1, len(results["citations"])):
         popup_contents.append(
             {
-                "Distance": f"{results["distances"][i]:.2f}",
-                "Coordinates": f"{str(verse_id)}, {results["verse_ids"][i]}",
-                "xCoord": int(verse_id),
-                "yCoord": int(results["verse_ids"][i]),
+                "Distance": f"{results['distances'][i]:.2f}",
+                "Coordinates": f"{str(verse_id)}, {results['verse_ids'][i]}",
+                "yCoord": int(verse_id),
+                "xCoord": int(results["verse_ids"][i]),
                 "X Verse": f"{verse_citation}",
                 "X Text": f"{verse_text}",
-                "Y Verse": f"{results["citations"][i]}",
-                "Y Text": f"{results["texts"][i]}",
+                "Y Verse": f"{results['citations'][i]}",
+                "Y Text": f"{results['texts'][i]}",
             }
         )
     return json.dumps(popup_contents)
