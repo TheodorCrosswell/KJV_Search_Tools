@@ -1,13 +1,13 @@
-.chroma/
 .venv/
 data/
+firebase-hosting/
 
 .git
 .gitignore
-LICENSE
-README.md
 Dockerfile
 .dockerignore
+LICENSE
+README.md
 
 __pycache__/
 *.pyc
