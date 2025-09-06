@@ -150,12 +150,18 @@ async def get_verse_similarity_results(
 
 
 @app.get("/")
-async def read_index():
+async def get_index():
     """This is the main page."""
     return FileResponse("static/pages/index.html")
 
 
 @app.get("/favicon.ico")
-async def read_index():
+async def get_favicon():
     """This is the favicon."""
     return FileResponse("static/favicon/kjv.png")
+
+
+@app.get("/changelog")
+async def get_changelog():
+    """This returns the changelog file."""
+    return FileResponse("static/changelog.json")

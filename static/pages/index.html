@@ -135,6 +135,44 @@
             cursor: pointer;
             font-weight: bold;
         }
+
+        #changelog-popup.hidden { 
+            display: none; 
+        } 
+
+        #changelog-popup { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(0, 0, 0, 0.5); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            z-index: 1050;
+        } 
+
+        #changelog-list {
+            max-height: 70vh; /* Sets the maximum height of the content area */
+            overflow-y: auto; /* Adds a scrollbar when the content exceeds the max-height */
+        }
+        
+        .popup-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            max-width: 500px;
+            width: 90%; /* Added for better responsiveness on medium screens */
+        }
+
+        /* Media query for mobile devices */
+        @media screen and (max-width: 600px) {
+            .popup-content {
+                width: 95%;
+                padding: 15px;
+            }
+        }
     </style>
 </head>
 
@@ -206,6 +244,13 @@
             <label for="y-coord">Y:</label>
             <input type="number" id="y-coord" placeholder="Enter Y coordinate">
             <button id="pan-button">Pan to Coordinate</button>
+        </div>
+    </div>
+    <div id="changelog-popup" class="hidden">
+        <div class="popup-content">
+            <h2>What's New</h2>
+            <ul id="changelog-list"></ul>
+            <button id="close-popup">Got it!</button>
         </div>
     </div>
 
@@ -317,6 +362,10 @@
     <script src="/static/scripts/leaflet_easybutton/easy-button.js"></script>
     <!-- Include the Leaflet Fullscreen Plugin -->
     <script src='/static/scripts/leaflet_fullscreen/dist/Leaflet.fullscreen.js'></script>
+    <!-- Include the Marked Markdown Parser Plugin -->
+    <script src='/static/scripts/marked/lib/marked.umd.js'></script>
+    <!-- Include the DOMPurify HTML Sanitizer Plugin -->
+    <script src='/static/scripts/dompurify/dist/purify.min.js'></script>
     <!-- Include the custom JavaScript files -->
     <script src="/static/scripts/custom/app.js"></script>
     <script src="/static/scripts/custom/map.js"></script>

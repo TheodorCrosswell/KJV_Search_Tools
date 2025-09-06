@@ -1,0 +1,10 @@
+[
+  {
+    "version": "v0.2.0",
+    "notes": "### This is the second release of KJV_Search_Tools.\n\nThis release was hosted on [kjv-search-tools.online](url) during its lifespan.\n\nYou can find the docker image for v0.2.0 here:\nhttps://hub.docker.com/repository/docker/theodorcrosswell/kjv-similarity-map/general\n\nYou can pull the docker image for v0.2.0 by running:\n\n```bash\ndocker pull theodorcrosswell/kjv-similarity-map:v0.2.0\n```\n\n## Changelog\n\nNew Features:\n\n- Fullscreen mode\n- Map color selector\n- Pan to coordinate\n- Project description and instructions\n- Links to churches\n- Links to Github, Docker, HuggingFace\n- Links to Github Profile, LinkedIn\n\nChanges:\n\n- None\n\nRemovals:\n\n- Image gallery"
+  },
+  {
+    "version": "v0.1.0",
+    "notes": "### This is the first release of KJV_Search_Tools.\n\nThis release was hosted on [kjv-search-tools.online](url) during its lifespan.\n\nYou can find the docker image for v0.1.0 here:\nhttps://hub.docker.com/repository/docker/theodorcrosswell/kjv-similarity-map/general\n\nYou can pull the docker image for v0.1.0 by running:\n\n```bash\ndocker pull theodorcrosswell/kjv-similarity-map:v0.1.0\n```\n\n## Changelog\n\nNew Features:\n\n- Leaflet.js map viewer\n- Tiles dataset\n- Image gallery\n\nChanges:\n\n- None\n\nRemovals:\n\n- None"
+  }
+]
