@@ -104,17 +104,49 @@ async def get_verse_selector_data():
 
 
 @app.get("/api/verse_similarity_search/{verse_id}/{limit}")
-async def get_verse_similarity_results(verse_id: int, limit: int = 10):
+@limiter.limit("3/minute")
+async def get_verse_similarity_results(
+    request: Request, verse_id: int, n_results: int = 10
+):
     collection = app_data["chroma_collection"]
     # collection = Collection()
-    embeddings = collection.get(
-        where={"verse_id": {"$eq": verse_id}}, include=["embeddings"]
-    )["embeddings"]
-    results = collection.query(
-        query_embeddings=embeddings, n_results=limit, include=["distances", "metadatas"]
+
+    verse_results = collection.get(
+        where={"verse_id": {"$eq": verse_id}},
+        include=["embeddings", "documents"],
+        limit=1,
     )
-    print(results)
-    return "\n".join(results["ids"][0])
+    verse_embeddings = verse_results["embeddings"]
+    verse_citation = verse_results["ids"][0]
+    verse_text = verse_results["documents"][0]
+
+    raw_results = collection.query(
+        query_embeddings=verse_embeddings,
+        n_results=n_results + 1,
+        include=["distances", "metadatas", "documents"],
+    )
+    results = {
+        "citations": raw_results["ids"][0],
+        "verse_ids": [x["verse_id"] for x in raw_results["metadatas"][0]],
+        "distances": raw_results["distances"][0],
+        "texts": raw_results["documents"][0],
+    }
+
+    popup_contents = []
+    for i in range(1, len(results["citations"])):
+        popup_contents.append(
+            {
+                "Distance": f"{results["distances"][i]:.2f}",
+                "Coordinates": f"{str(verse_id)}, {results["verse_ids"][i]}",
+                "xCoord": int(verse_id),
+                "yCoord": int(results["verse_ids"][i]),
+                "X Verse": f"{verse_citation}",
+                "X Text": f"{verse_text}",
+                "Y Verse": f"{results["citations"][i]}",
+                "Y Text": f"{results["texts"][i]}",
+            }
+        )
+    return json.dumps(popup_contents)
 
 
 @app.get("/")

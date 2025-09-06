@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const chapterSelect = document.getElementById('chapter-select');
     const verseSelect = document.getElementById('verse-select');
     const verseMatchButton = document.getElementById('match-button');
+    const clearMarkersButton = document.getElementById('clear-markers-button');
     const verseCoordLabel = document.getElementById('verse_coord');
 
     let bibleData = {};
@@ -104,15 +105,55 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    function getVerseMatches() {
-        fetch(`/api/verse_similarity_search/${getVerseNumber()}/10`)
-        .then(response => response.json())
-        .then(data => {
-            results = data;
-            
-        });
-        verseCoordLabel.innerText = results
+    function getVerseMatches() {         
+        // We want the pixel coordinates at the zoom level that represents the original image size.
+        const targetZoom = nativeZoom;
+
+        // Construct the URL for our FastAPI endpoint
+        const verseSimilaritySearchApiUrl = `/api/verse_similarity_search/${getVerseNumber()}/10`;
+
+        // Use fetch to make the API call
+        fetch(verseSimilaritySearchApiUrl)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                popupContents = JSON.parse(data)
+                popupContents.forEach(item => {
+                    const xCoord = item.xCoord;
+                    const yCoord = item.yCoord;
+                    delete item.xCoord;
+                    delete item.yCoord;
+
+
+                    const latlng = map.unproject([yCoord, xCoord], targetZoom);
+
+                    const contentLines = [];
+                    for (const [key, value] of Object.entries(item)) {
+                        const formattedKey = key.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+                        contentLines.push(`<b>${formattedKey}:</b> ${value}`);
+                    }
+                    const popupContent = contentLines.join('<br>');
+
+                    L.marker(latlng).bindPopup(popupContent).addTo(markerGroup);
+                });
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+            });
     }
 
-    verseMatchButton.addEventListener('click', getVerseMatches)
+    function clearMarkers() {
+        markerGroup.clearLayers();
+    }
+
+    var markerGroup = L.featureGroup().addTo(map);
+
+    verseMatchButton.addEventListener('click', getVerseMatches);
+
+    clearMarkersButton.addEventListener('click', clearMarkers);
+
 });

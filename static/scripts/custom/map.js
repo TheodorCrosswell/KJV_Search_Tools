@@ -59,10 +59,10 @@ map.on('click', function(e) {
     y = Math.min(Math.max(y, min), max);
 
     // Construct the URL for our FastAPI endpoint
-    const apiUrl = `/api/pixel_info/${x}/${y}`;
+    const pixelInfoApiUrl = `/api/pixel_info/${x}/${y}`;
 
     // Use fetch to make the API call
-    fetch(apiUrl)
+    fetch(pixelInfoApiUrl)
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
