@@ -1,11 +1,12 @@
 .venv/
-data/
 firebase-hosting/
+frontend/
+tiles/tiles.zip
 
 .git
+.dockerignore
 .gitignore
 Dockerfile
-.dockerignore
 LICENSE
 README.md
 
@@ -15,3 +16,9 @@ __pycache__/
 *.egg-info/
 .DS_Store
 *.ipynb
+
+!frontend/dist/
+# Toggle this in order to control whether the image has this or not.
+# !tiles/tiles.zip
+# v0.3.0 - 403.0s
+# v0.3.0-no-tiles - 11.1s

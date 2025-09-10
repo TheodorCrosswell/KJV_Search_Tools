@@ -1,0 +1,131 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background-color: #f4f4f4;
+}
+
+#sidebar {
+    height: 100%;
+    width: 300px;
+    position: fixed;
+    top: 0;
+    right: 0;
+    background-color: #fff;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+    transform: translateX(100%);
+    transition: transform 0.3s ease-in-out;
+    z-index: 1010;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+#sidebar.open {
+    transform: translateX(0);
+}
+
+#sidebar-toggle {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    z-index: 1011;
+    cursor: pointer;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-size: 18px;
+}
+
+#main-content {
+    padding: 20px;
+}
+
+#map {
+    height: 400px;
+    background-color: #e0e0e0;
+    margin-bottom: 30px;
+    border-radius: 8px;
+}
+
+#sidebar .color-controls,
+#sidebar #pan-controls {
+    margin-bottom: 20px;
+    padding: 0;
+    background-color: transparent;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+#sidebar #pan-controls input {
+    width: calc(100% - 20px);
+    margin-bottom: 10px;
+}
+
+#sidebar #pan-controls button {
+    width: 100%;
+}
+
+.control-group {
+    margin-bottom: 10px;
+}
+
+label {
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+select,
+input[type="range"] {
+    margin-right: 20px;
+    width: calc(100% - 100px);
+}
+
+.slider-group {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 10px;
+}
+
+summary {
+    cursor: pointer;
+    font-weight: bold;
+}
+
+#changelog-popup.hidden { 
+    display: none; 
+} 
+
+#changelog-popup { 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    background-color: rgba(0, 0, 0, 0.5); 
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
+    z-index: 1050;
+} 
+
+#changelog-list {
+    max-height: 70vh; /* Sets the maximum height of the content area */
+    overflow-y: auto; /* Adds a scrollbar when the content exceeds the max-height */
+}
+
+.popup-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    max-width: 500px;
+    width: 90%; /* Added for better responsiveness on medium screens */
+}
+
+/* Media query for mobile devices */
+@media screen and (max-width: 600px) {
+    .popup-content {
+        width: 95%;
+        padding: 15px;
+    }
+}

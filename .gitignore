@@ -1,9 +1,7 @@
 # To avoid uploading db every update.
 .chroma
-data
-static/tiles
-static/icons
-static/scripts/leaflet_easybutton
+static
+tiles.zip
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -1,5 +1,5 @@
 # Use an official Python runtime as a parent image for a lean image size
-FROM python:3.10-slim-buster
+FROM python:3.10-slim-bookworm
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -18,4 +18,4 @@ EXPOSE 8000
 
 # Define the command to run your application using Uvicorn
 # 'src.main:app' tells Uvicorn to look for the 'app' object in 'main.py' inside the 'src' directory.
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "backend.src.main:app", "--host", "0.0.0.0", "--port", "8000"]

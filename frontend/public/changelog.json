@@ -1,0 +1,18 @@
+[
+  {
+    "version": "v0.3.0",
+    "notes": "New Features:\n\n- None\n\nChanges:\n\n- Refactored frontend code to use Vite build\n- Now using a mounted volume instead of storing tiles data inside the docker image\n\nRemovals:\n\n- None"
+  },
+  {
+    "version": "v0.2.1",
+    "notes": "New Features:\n\n- Verse similarity search\n- Verse selector\n- Changelog popup\n- Opengraph tags for preview when sharing the link\n\nChanges:\n\n- Added missing licenses for libraries (oops)\n\nRemovals:\n- None"
+  },
+  {
+    "version": "v0.2.0",
+    "notes": "New Features:\n\n- Fullscreen mode\n- Map color selector\n- Pan to coordinate\n- Project description and instructions\n- Links to churches\n- Links to Github, Docker, HuggingFace\n- Links to Github Profile, LinkedIn\n\nChanges:\n\n- None\n\nRemovals:\n\n- Image gallery"
+  },
+  {
+    "version": "v0.1.0",
+    "notes": "New Features:\n\n- Leaflet.js map viewer\n- Tiles dataset\n- Image gallery\n\nChanges:\n\n- None\n\nRemovals:\n\n- None"
+  }
+]
