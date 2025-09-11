@@ -10,11 +10,21 @@ import json
 from chromadb import PersistentClient, Collection
 import zipfile
 import io
+import os
 
 # To start in server in development mode:
 #  ./.venv/Scripts/python.exe -m fastapi dev ./backend/src/main.py
 # To start server in production mode:
 # ./.venv/Scripts/python.exe -m uvicorn backend.src.main:app --host 0.0.0.0 --port 8000
+
+
+# 1. Get the directory of the current file (main.py)
+# __file__ is a special variable that holds the path to the current script.
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# 2. Go up one level to the project root ('backend/')
+backend_dir = os.path.dirname(current_dir)
+project_root = os.path.dirname(backend_dir)
 
 # This acts as an in-memory database
 app_data = {}
@@ -29,9 +39,10 @@ limiter = Limiter(key_func=get_remote_address)
 # The lifespan context manager
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """This loads the kjv.csv file into memory, allowing for fast retrieval of pixel_info"""
+    """Loads kjv.csv, verse_selector_data.json into memory and opens tiles.zip,"""
+
     # --- Code to run on startup ---
-    df = pl.read_csv("frontend/dist/kjv.csv")
+    df = pl.read_csv(os.path.join(project_root, "frontend/dist/kjv.csv"))
 
     # Load the verse details lookup table
     app_data["verse_info"] = df.select(["citation", "text"]).rename(
@@ -39,14 +50,19 @@ async def lifespan(app: FastAPI):
     )
 
     # Load verse_selector_data from JSON file
-    with open("frontend/dist/verse_selector_data.json") as file:
+    with open(
+        os.path.join(project_root, "frontend/dist/verse_selector_data.json")
+    ) as file:
         app_data["verse_selector_data"] = json.load(file)
 
-    app_data["chroma_collection"] = PersistentClient(".chroma").get_collection(
-        "kjv_verses"
-    )
+    app_data["chroma_collection"] = PersistentClient(
+        os.path.join(project_root, ".chroma")
+    ).get_collection("kjv_verses")
 
-    zip_path = "/tiles/tiles.zip"
+    # 3. Construct the path to the zip file using os.path.join()
+    # This will correctly create 'C:\repos\KJV_Search_Tools\tiles\tiles.zip' on Windows
+    # and '/path/to/project/tiles/tiles.zip' on a Linux/Docker system.
+    zip_path = os.path.join(project_root, "tiles", "tiles.zip")
     app_data["tiles_zipfile"] = zipfile.ZipFile(zip_path, "r")
 
     print("Data loaded successfully.")
@@ -69,7 +85,11 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
 # Serve index.html, app.js, scripts, and tiles.
-app.mount("/dist", StaticFiles(directory="frontend/dist"), name="dist")
+app.mount(
+    "/dist",
+    StaticFiles(directory=os.path.join(project_root, "frontend/dist")),
+    name="dist",
+)
 # Now using an uncompressed .zip archive in order to speed up file transfer
 # app.mount("/tiles", StaticFiles(directory="frontend/tiles"), name="tiles")
 
@@ -189,22 +209,22 @@ async def get_verse_similarity_results(
 @app.get("/")
 async def get_index():
     """This is the main page."""
-    return FileResponse("frontend/dist/index.html")
+    return FileResponse(os.path.join(project_root, "frontend/dist/index.html"))
 
 
 @app.get("/favicon.ico")
 async def get_favicon():
     """This is the favicon."""
-    return FileResponse("frontend/dist/kjv.png")
+    return FileResponse(os.path.join(project_root, "frontend/dist/kjv.png"))
 
 
 @app.get("/og.png")
 async def get_favicon():
     """This is the opengraph preview image."""
-    return FileResponse("frontend/dist/og.png")
+    return FileResponse(os.path.join(project_root, "frontend/dist/og.png"))
 
 
 @app.get("/changelog")
 async def get_changelog():
     """This returns the changelog file."""
-    return FileResponse("frontend/dist/changelog.json")
+    return FileResponse(os.path.join(project_root, "frontend/dist/changelog.json"))

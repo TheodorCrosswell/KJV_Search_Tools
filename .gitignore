@@ -1,6 +1,5 @@
 # To avoid uploading db every update.
 .chroma
-static
 tiles.zip
 
 # Byte-compiled / optimized / DLL files
