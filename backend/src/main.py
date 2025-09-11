@@ -195,8 +195,8 @@ async def get_verse_similarity_results(
             {
                 "Distance": f"{results['distances'][i]:.2f}",
                 "Coordinates": f"{str(verse_id)}, {results['verse_ids'][i]}",
-                "yCoord": int(verse_id),
-                "xCoord": int(results["verse_ids"][i]),
+                "xCoord": int(verse_id),
+                "yCoord": int(results["verse_ids"][i]),
                 "X Verse": f"{verse_citation}",
                 "X Text": f"{verse_text}",
                 "Y Verse": f"{results['citations'][i]}",

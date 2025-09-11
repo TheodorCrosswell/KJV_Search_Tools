@@ -5,5 +5,4 @@ import './map';
 import './sidebar';
 import './verse_selector'
 import './color_selector';
-import './pan_to_coordinates';
 import './similarity_search';
