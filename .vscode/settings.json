@@ -1,10 +1,10 @@
 {
-    "emeraldwalk.runonsave": {
-        "commands": [
-            {
-                "match": "\\.(html|css|js)$",
-                "cmd": "cd frontend && npm run build"
-            }
-        ]
-    }
+  "emeraldwalk.runonsave": {
+    "commands": [
+      {
+        "match": "\\.(html|css|js|json)$",
+        "cmd": "cd frontend && npm run build"
+      }
+    ]
+  }
 }

@@ -30,12 +30,10 @@ export function getVerseInfoById(verseId) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  const verseMatchButton = document.getElementById("match-button");
-  const verseSelect = document.getElementById("current-verse-select");
-  const verseTextDiv = document.getElementById("verse-info");
+  const verseLookupInfoDiv = document.getElementById("verse-lookup-info");
 
   function initializeWorker() {
-    verseTextDiv.innerHTML = "<p>Initializing data store...</p>";
+    verseLookupInfoDiv.innerHTML = "<p>Initializing data store...</p>";
     worker = new Worker(new URL("./data.worker.js", import.meta.url), {
       type: "module",
     });
@@ -45,9 +43,9 @@ document.addEventListener("DOMContentLoaded", () => {
       console.log("Message from worker:", event.data);
 
       if (status === "info") {
-        verseTextDiv.innerHTML = `<p>${message}</p>`;
+        verseLookupInfoDiv.innerHTML = `<p>${message}</p>`;
       } else if (status === "ready") {
-        verseTextDiv.innerHTML = `<p>${message} You can now search.</p>`;
+        verseLookupInfoDiv.innerHTML = `<p>${message} You can now search.</p>`;
       } else if (status === "queryResult") {
         // --- If a promise is waiting, resolve it ---
         if (versePromiseResolver) {
@@ -55,7 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
           versePromiseResolver = null; // Clear it for the next request
         }
       } else if (status === "error") {
-        verseTextDiv.innerHTML = `<p style="color: red;">Error: ${message}</p>`;
+        verseLookupInfoDiv.innerHTML = `<p style="color: red;">Error: ${message}</p>`;
       }
     };
     worker.postMessage({ command: "init" });
@@ -64,7 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (window.Worker) {
     initializeWorker();
   } else {
-    verseTextDiv.innerHTML =
+    verseLookupInfoDiv.innerHTML =
       "<p>Your browser does not support Web Workers.</p>";
   }
 });

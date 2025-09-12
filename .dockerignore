@@ -1,7 +1,7 @@
 .venv/
+.vscode/
 firebase-hosting/
 frontend/
-tiles/tiles.zip
 
 .git
 .dockerignore
@@ -18,7 +18,3 @@ __pycache__/
 *.ipynb
 
 !frontend/dist/
-# Toggle this in order to control whether the image has this or not.
-# !tiles/tiles.zip
-# v0.3.0 - 403.0s
-# v0.3.0-no-tiles - 11.1s
