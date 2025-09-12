@@ -10,9 +10,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const clearMarkersButton = document.getElementById('clear-markers-button');
     const previousMarkerButton = document.getElementById('previous-marker-button');
     const nextMarkerButton = document.getElementById('next-marker-button');
+    const currentVerseSelect = document.getElementById("current-verse-select");
     let markerDatas = {};
-    let currentMarkerIndex = 0;
-    let currentVerseNumber = 0;
+    let currentMarkerIndex = -1;
+    let currentVerseNumber = -1;
     // const nativeZoom = 7
 
     function getVerseMatches() {         
@@ -54,6 +55,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     L.marker(latlng).bindPopup(popupContent).addTo(markerGroup);
                 });
+                const newOption = document.createElement('option');
+                newOption.value = currentVerseNumber;
+                newOption.textContent = +currentVerseNumber + " Need to look coord up in kjv";
+                currentVerseSelect.appendChild(newOption);
             })
             .catch(error => {
                 console.error('There was a problem with the fetch operation:', error);
@@ -63,6 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function clearMarkers() {
         markerDatas = {};
         markerGroup.clearLayers();
+        currentVerseSelect.options.length = 0;
     }
 
     function panToMarker() {
@@ -92,5 +98,10 @@ document.addEventListener('DOMContentLoaded', () => {
     previousMarkerButton.addEventListener('click', () => {
         currentMarkerIndex -= 1;
         panToMarker();
+    });
+
+    currentVerseSelect.addEventListener('change', () =>{
+        currentVerseNumber = currentVerseSelect.value
+        currentMarkerIndex = -1
     });
 });
