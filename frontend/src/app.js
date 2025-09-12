@@ -3,6 +3,5 @@ import 'leaflet.fullscreen/Control.FullScreen.css';
 import './changelog_popup';
 import './map';
 import './sidebar';
-import './verse_selector'
 import './color_selector';
 import './similarity_search';
