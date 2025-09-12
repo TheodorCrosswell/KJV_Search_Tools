@@ -132,7 +132,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const currentVerseSelect = document.getElementById("current-verse-select");
   let currentMarkerIndex = 0;
   let currentVerseNumber = 1;
-  let currentMarkerVerseID = 1;
   let markersList = {};
   // const nativeZoom = 7
 
@@ -151,18 +150,17 @@ document.addEventListener("DOMContentLoaded", () => {
         return response.json();
       })
       .then(async (data) => {
-        // --- Make this inner function async as well ---
         markersList[currentVerseNumber] = [];
         currentMarkerIndex = 0;
+        const xVerseInfo = await getVerseInfoById(currentVerseNumber);
         for (const markerData of JSON.parse(data)) {
           const latlng = map.unproject(
             [markerData.xCoord, markerData.yCoord],
             nativeZoom
           );
-          const xVerseInfo = await getVerseInfoById(markerData.xCoord);
           const yVerseInfo = await getVerseInfoById(markerData.yCoord);
 
-          const popupContent = `<b>Distance:</b> ${markerData.Distance}<br>
+          const popupContent = `<b>Distance:</b> ${markerData.distance}<br>
             <b>Coordinates:</b> ${xVerseInfo.verse_id}, ${yVerseInfo.verse_id}<br>
             <b>X Citation:</b> ${xVerseInfo.citation}<br>
             <b>X Text:</b> ${xVerseInfo.text}<br>
@@ -177,8 +175,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const newOption = document.createElement("option");
         newOption.value = currentVerseNumber;
-        newOption.textContent = await getVerseInfoById(currentVerseNumber)
-          .citation;
+        newOption.textContent = xVerseInfo.citation;
 
         currentVerseSelect.appendChild(newOption);
         currentVerseSelect.value = currentVerseNumber;

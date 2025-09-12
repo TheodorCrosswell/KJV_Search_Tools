@@ -18,7 +18,7 @@ export function getVerseInfoById(verseId) {
     // Send the query command to the worker
     worker.postMessage({ command: "query", payload: { verse_id: verseId } });
 
-    // Optional: Add a timeout to prevent waiting forever
+    // Add a timeout to prevent waiting forever
     setTimeout(() => {
       if (versePromiseResolver) {
         // If it hasn't been resolved yet
@@ -54,8 +54,6 @@ document.addEventListener("DOMContentLoaded", () => {
           versePromiseResolver(result);
           versePromiseResolver = null; // Clear it for the next request
         }
-        // Also display the results in the main view as before
-        displayResults(result);
       } else if (status === "error") {
         verseTextDiv.innerHTML = `<p style="color: red;">Error: ${message}</p>`;
       }
@@ -63,37 +61,8 @@ document.addEventListener("DOMContentLoaded", () => {
     worker.postMessage({ command: "init" });
   }
 
-  function handleSearch() {
-    const verseId = parseInt(verseSelect.value, 10);
-    if (isNaN(verseId)) {
-      verseTextDiv.innerHTML =
-        '<p style="color: red;">Please enter a valid Verse ID.</p>';
-      return;
-    }
-    verseTextDiv.innerHTML = `<p>Searching for Verse ID: ${verseId}...</p>`;
-
-    // --- Use the new Promise-based function ---
-    getVerseInfoById(verseId).catch((error) => {
-      console.error("Search failed:", error);
-      verseTextDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
-    });
-  }
-
-  function displayResults(result) {
-    if (result) {
-      verseTextDiv.innerHTML = `
-        <h3>${result.citation}</h3>
-        <p>${result.text}</p>
-      `;
-    } else {
-      verseTextDiv.innerHTML = "<p>Verse not found.</p>";
-    }
-  }
-
   if (window.Worker) {
     initializeWorker();
-    verseMatchButton.addEventListener("click", handleSearch);
-    verseSelect.addEventListener("change", handleSearch);
   } else {
     verseTextDiv.innerHTML =
       "<p>Your browser does not support Web Workers.</p>";

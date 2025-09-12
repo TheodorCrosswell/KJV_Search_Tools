@@ -5,21 +5,18 @@ from contextlib import asynccontextmanager
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
-import polars as pl
 import json
 from chromadb import PersistentClient, Collection
 import zipfile
 import io
 import os
 
-# To start in server in development mode:
+# To start server in development mode:
 #  ./.venv/Scripts/python.exe -m fastapi dev ./backend/src/main.py
 # To start server in production mode:
 # ./.venv/Scripts/python.exe -m uvicorn backend.src.main:app --host 0.0.0.0 --port 8000
 
-
 # 1. Get the directory of the current file (main.py)
-# __file__ is a special variable that holds the path to the current script.
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
 # 2. Go up one level to the project root ('backend/')
@@ -39,29 +36,13 @@ limiter = Limiter(key_func=get_remote_address)
 # The lifespan context manager
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Loads kjv.csv, verse_selector_data.json into memory and opens tiles.zip,"""
-
-    # --- Code to run on startup ---
-    df = pl.read_csv(os.path.join(project_root, "frontend/dist/kjv.csv"))
-
-    # Load the verse details lookup table
-    app_data["verse_info"] = df.select(["citation", "text"]).rename(
-        {"citation": "Verse"}
-    )
-
-    # Load verse_selector_data from JSON file
-    with open(
-        os.path.join(project_root, "frontend/dist/verse_selector_data.json")
-    ) as file:
-        app_data["verse_selector_data"] = json.load(file)
+    """Opens tiles.zip and ChromaDB Collection"""
 
     app_data["chroma_collection"] = PersistentClient(
         os.path.join(project_root, ".chroma")
     ).get_collection("kjv_verses")
 
-    # 3. Construct the path to the zip file using os.path.join()
-    # This will correctly create 'C:\repos\KJV_Search_Tools\tiles\tiles.zip' on Windows
-    # and '/path/to/project/tiles/tiles.zip' on a Linux/Docker system.
+    # zipfile
     zip_path = os.path.join(project_root, "tiles", "tiles.zip")
     app_data["tiles_zipfile"] = zipfile.ZipFile(zip_path, "r")
 
@@ -84,14 +65,12 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
-# Serve index.html, app.js, scripts, and tiles.
+# Serve index.html, app.js, scripts
 app.mount(
     "/dist",
     StaticFiles(directory=os.path.join(project_root, "frontend/dist")),
     name="dist",
 )
-# Now using an uncompressed .zip archive in order to speed up file transfer
-# app.mount("/tiles", StaticFiles(directory="frontend/tiles"), name="tiles")
 
 
 @app.get("/tiles/{filename:path}")
@@ -124,86 +103,44 @@ async def serve_file_from_zip(filename: str):
         # This would happen if 'file_archive.zip' itself is missing.
         raise HTTPException(status_code=500, detail="Archive not found")
 
-
-# TODO: consider moving this to client-side processing to avoid loading the server much.
-@app.get("/api/pixel_info/{x}/{y}")
-@limiter.limit("1/second")
-def get_pixel_info(x: int, y: int, request: Request):
-    """This is used to get the verse addresses for the clicked pixel.
-    - x: the index of verse x
-    - y: the index of verse y"""
-    verse_df = pl.DataFrame(app_data["verse_info"])
-
-    # Make sure verse_id is a valid index
-    if 0 <= x <= len(verse_df) and 0 <= y <= len(verse_df):
-        # .row() returns a tuple of the values in that row
-        x_row_data = verse_df.row(x - 1)
-        y_row_data = verse_df.row(y - 1)
-        # Convert the tuple of data into a dictionary
-        verse_x_dict = {
-            "X " + col: val for col, val in zip(verse_df.columns, x_row_data)
-        }
-        verse_y_dict = {
-            "Y " + col: val for col, val in zip(verse_df.columns, y_row_data)
-        }
-        result = {"Coordinates": f"{x}, {y}", **verse_x_dict, **verse_y_dict}
-    else:
-        result = {
-            "error": "Verse ID out of bounds",
-            "verse_x_id": x,
-            "verse_y_id": y,
-        }
-    return result
-
-
-@app.get("/api/verse_selector_data")
-async def get_verse_selector_data():
-    return app_data["verse_selector_data"]
-
-
 @app.get("/api/verse_similarity_search/{verse_id}/{n_results}")
 @limiter.limit("10/minute")
 async def get_verse_similarity_results(
     request: Request, verse_id: int, n_results: int = 10
 ):
+    if n_results > 100:
+        n_results = 100
+    elif n_results < 1:
+        n_results = 1
     collection = app_data["chroma_collection"]
     # collection = Collection()
     verse_results = collection.get(
         where={"verse_id": {"$eq": verse_id}},
-        include=["embeddings", "documents"],
+        include=["embeddings"],
         limit=1,
     )
     verse_embeddings = verse_results["embeddings"]
-    verse_citation = verse_results["ids"][0]
-    verse_text = verse_results["documents"][0]
 
     raw_results = collection.query(
         query_embeddings=verse_embeddings,
-        n_results=n_results + 1,
-        include=["distances", "metadatas", "documents"],
+        n_results=n_results + 1, # In order to avoid having a where filter, this is probably quicker
+        include=["distances", "metadatas"],
     )
     results = {
-        "citations": raw_results["ids"][0],
         "verse_ids": [x["verse_id"] for x in raw_results["metadatas"][0]],
         "distances": raw_results["distances"][0],
-        "texts": raw_results["documents"][0],
     }
 
-    popup_contents = []
-    for i in range(1, len(results["citations"])):
-        popup_contents.append(
+    marker_datas = []
+    for i in range(1, len(results["verse_ids"])):
+        marker_datas.append(
             {
-                "Distance": f"{results['distances'][i]:.2f}",
-                "Coordinates": f"{str(verse_id)}, {results['verse_ids'][i]}",
+                "distance": f"{results['distances'][i]:.2f}",
                 "xCoord": int(verse_id),
                 "yCoord": int(results["verse_ids"][i]),
-                "X Verse": f"{verse_citation}",
-                "X Text": f"{verse_text}",
-                "Y Verse": f"{results['citations'][i]}",
-                "Y Text": f"{results['texts'][i]}",
             }
         )
-    return json.dumps(popup_contents)
+    return json.dumps(marker_datas)
 
 
 @app.get("/")
