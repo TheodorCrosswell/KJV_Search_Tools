@@ -5,3 +5,5 @@ import './map';
 import './sidebar';
 import './color_selector';
 import './similarity_search';
+import './data.worker';
+import './kjv';

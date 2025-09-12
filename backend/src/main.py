@@ -216,15 +216,3 @@ async def get_index():
 async def get_favicon():
     """This is the favicon."""
     return FileResponse(os.path.join(project_root, "frontend/dist/kjv.png"))
-
-
-@app.get("/og.png")
-async def get_favicon():
-    """This is the opengraph preview image."""
-    return FileResponse(os.path.join(project_root, "frontend/dist/og.png"))
-
-
-@app.get("/changelog")
-async def get_changelog():
-    """This returns the changelog file."""
-    return FileResponse(os.path.join(project_root, "frontend/dist/changelog.json"))

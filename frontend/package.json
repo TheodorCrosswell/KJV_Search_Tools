@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "dompurify": "^3.2.6",
+    "idb": "^8.0.3",
     "leaflet": "^1.9.4",
     "leaflet.fullscreen": "^4.0.0",
     "marked": "^16.2.1"
