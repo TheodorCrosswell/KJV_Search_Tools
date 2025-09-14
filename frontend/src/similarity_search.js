@@ -155,7 +155,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const xVerseInfo = await getVerseInfoById(currentVerseNumber);
         for (const markerData of JSON.parse(data)) {
           const latlng = map.unproject(
-            [markerData.xCoord, markerData.yCoord],
+            [markerData.xCoord - 0.5, markerData.yCoord - 0.5],
             nativeZoom
           );
           const yVerseInfo = await getVerseInfoById(markerData.yCoord);
