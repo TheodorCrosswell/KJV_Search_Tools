@@ -57,7 +57,141 @@ export const tileLayer = L.tileLayer(tileUrl, {
 // Map initial view
 map.fitBounds(imageLatLngBounds);
 
-// Click handling
+document.addEventListener("DOMContentLoaded", () => {
+  // Create a custom control
+  var customControl = L.Control.extend({
+    options: {
+      position: "topright",
+    },
+
+    onAdd: function (map) {
+      var container = L.DomUtil.create(
+        "div",
+        "leaflet-bar leaflet-control leaflet-control-custom"
+      );
+
+      // Search Button
+      var searchButton = L.DomUtil.create(
+        "a",
+        "leaflet-control-custom-button",
+        container
+      );
+      searchButton.id = "match-button";
+      searchButton.innerHTML = "&#128269;";
+      searchButton.href = "#";
+      searchButton.role = "button";
+      searchButton.title = "Search";
+
+      // Previous Marker Button
+      var prevButton = L.DomUtil.create(
+        "a",
+        "leaflet-control-custom-button",
+        container
+      );
+      prevButton.id = "previous-marker-button";
+      prevButton.innerHTML = "&#8592;";
+      prevButton.href = "#";
+      prevButton.role = "button";
+      prevButton.title = "Previous Marker";
+
+      // Next Marker Button
+      var nextButton = L.DomUtil.create(
+        "a",
+        "leaflet-control-custom-button",
+        container
+      );
+      nextButton.id = "next-marker-button";
+      nextButton.innerHTML = "&#8594;";
+      nextButton.href = "#";
+      nextButton.role = "button";
+      nextButton.title = "Next Marker";
+
+      // Clear Markers Button
+      var clearMarkersButton = L.DomUtil.create(
+        "a",
+        "leaflet-control-custom-button",
+        container
+      );
+      clearMarkersButton.id = "clear-markers-button";
+      clearMarkersButton.innerHTML = "&#128465;";
+      clearMarkersButton.href = "#";
+      clearMarkersButton.role = "button";
+      clearMarkersButton.title = "Clear Markers";
+
+      // Series Select Dropdown
+      var seriesSelectContainer = L.DomUtil.create(
+        "div",
+        "custom-control-select",
+        container
+      );
+      var seriesSelect = L.DomUtil.create("select", "", seriesSelectContainer);
+      seriesSelect.id = "current-verse-select";
+
+      // Book Select Dropdown
+      var bookSelectContainer = L.DomUtil.create(
+        "div",
+        "custom-control-select",
+        container
+      );
+      var bookSelect = L.DomUtil.create("select", "", bookSelectContainer);
+      bookSelect.id = "book-select";
+
+      // Container for Chapter and Verse selects to be on one row
+      var chapterVerseRow = L.DomUtil.create(
+        "div",
+        "chapter-verse-row",
+        container
+      );
+
+      // Chapter Select Dropdown
+      var chapterSelectContainer = L.DomUtil.create(
+        "div",
+        "custom-control-select",
+        chapterVerseRow
+      );
+      var chapterSelect = L.DomUtil.create(
+        "select",
+        "",
+        chapterSelectContainer
+      );
+      chapterSelect.id = "chapter-select";
+
+      // Verse Select Dropdown
+      var verseSelectContainer = L.DomUtil.create(
+        "div",
+        "custom-control-select",
+        chapterVerseRow
+      );
+      var verseSelect = L.DomUtil.create("select", "", verseSelectContainer);
+      verseSelect.id = "verse-select";
+
+      // Color Select Dropdown
+      var colorSelectContainer = L.DomUtil.create(
+        "div",
+        "custom-control-select",
+        container
+      );
+      var colorSelect = L.DomUtil.create("select", "", colorSelectContainer);
+      colorSelect.id = "color-presets";
+      colorSelect.innerHTML = `<option value="none">Default</option>
+                <option value="sepia(100%) hue-rotate(0deg) saturate(200%) brightness(90%)">Sepia</option>
+                <option value="sepia(100%) hue-rotate(90deg) saturate(200%) brightness(90%)">Jungle</option>
+                <option value="sepia(100%) hue-rotate(180deg) saturate(120%) brightness(90%)">Ocean</option>
+                <option value="sepia(100%) hue-rotate(270deg) saturate(180%) brightness(90%)">Pink</option>
+            `;
+
+      // Prevent map clicks from propagating to the controls
+      L.DomEvent.disableClickPropagation(container);
+
+      return container;
+    },
+  });
+
+  // Add the custom control to the map
+  map.addControl(new customControl());
+});
+
+// Pixel info - Retrieves verse info for clicked pixel
 map.on("click", async function (e) {
   // We want the pixel coordinates at the zoom level that represents the original image size.
   const targetZoom = nativeZoom;

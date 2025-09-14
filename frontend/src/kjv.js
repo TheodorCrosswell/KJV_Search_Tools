@@ -30,30 +30,19 @@ export function getVerseInfoById(verseId) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  const verseLookupInfoDiv = document.getElementById("verse-lookup-info");
-
   function initializeWorker() {
-    verseLookupInfoDiv.innerHTML = "<p>Initializing data store...</p>";
     worker = new Worker(new URL("./data.worker.js", import.meta.url), {
       type: "module",
     });
 
     worker.onmessage = (event) => {
       const { status, message, result } = event.data;
-      console.log("Message from worker:", event.data);
-
-      if (status === "info") {
-        verseLookupInfoDiv.innerHTML = `<p>${message}</p>`;
-      } else if (status === "ready") {
-        verseLookupInfoDiv.innerHTML = `<p>${message} You can now search.</p>`;
-      } else if (status === "queryResult") {
+      if (status === "queryResult") {
         // --- If a promise is waiting, resolve it ---
         if (versePromiseResolver) {
           versePromiseResolver(result);
           versePromiseResolver = null; // Clear it for the next request
         }
-      } else if (status === "error") {
-        verseLookupInfoDiv.innerHTML = `<p style="color: red;">Error: ${message}</p>`;
       }
     };
     worker.postMessage({ command: "init" });
@@ -62,7 +51,6 @@ document.addEventListener("DOMContentLoaded", () => {
   if (window.Worker) {
     initializeWorker();
   } else {
-    verseLookupInfoDiv.innerHTML =
-      "<p>Your browser does not support Web Workers.</p>";
+    console.error("<p>Your browser does not support Web Workers.</p>");
   }
 });

@@ -1,5 +1,9 @@
 [
   {
+    "version": "v0.3.2",
+    "notes": "New Features:\n\n- None\n\nChanges:\n\n- Moved controls to the map instead of a sidebar\n\nRemovals:\n\n- Removed the sidebar\n- Removed custom color sliders"
+  },
+  {
     "version": "v0.3.1",
     "notes": "New Features:\n\n- You can now pan through the markers for each query\n- You can now select which query markers to pan through\n\nChanges:\n\n- Now using client-side verse lookup\n- Now reverting to storing tiles data inside the docker image instead of using a cloud bucket\n\nRemovals:\n\n- Removed obsolete paths from the backend"
   },

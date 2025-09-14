@@ -3,7 +3,7 @@
     "commands": [
       {
         "match": "\\.(html|css|js|json)$",
-        "cmd": "cd frontend && npm run build"
+        "cmd": "cd frontend && npm run build && time"
       }
     ]
   }
